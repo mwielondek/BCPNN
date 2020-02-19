@@ -13,7 +13,7 @@ class BCPNN(BaseEstimator, ClassifierMixin):
     def fit(self, X, y):
         X, y = check_X_y(X, y)
         self.classes_ = unique_labels(y)
-        self.n_classes_ = y.shape[0]
+        self.n_classes_ = self.classes_.shape[0]
         self.n_samples_, self.n_features_ = X.shape
 
         self.X_ = X
