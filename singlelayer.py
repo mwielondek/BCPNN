@@ -7,8 +7,8 @@ from functools import partial
 
 class BCPNN(BaseEstimator, ClassifierMixin):
 
-    def __init__(self):
-        pass
+    def __init__(self, alpha=None):
+        self.alpha = alpha
 
     def fit(self, X, y):
         X, y = check_X_y(X, y)
@@ -20,7 +20,8 @@ class BCPNN(BaseEstimator, ClassifierMixin):
         self.y_ = y
 
         # Set alpha to some small value, here 1/C is used (Holst 1997)
-        self.alpha = 1 / self.n_samples_
+        if self.alpha is None:
+            self.alpha = 1 / self.n_samples_
 
         return self
 
