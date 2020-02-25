@@ -3,7 +3,7 @@ from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.utils.validation import check_X_y, check_array, check_is_fitted
 from sklearn.utils.multiclass import unique_labels
 
-from functools import partial
+from functools import partial, lru_cache
 
 class BCPNN(BaseEstimator, ClassifierMixin):
 
@@ -49,6 +49,7 @@ class BCPNN(BaseEstimator, ClassifierMixin):
         highest_prob = list(map(np.argmax, s_values))
         return self.classes_[highest_prob]
 
+    @lru_cache(maxsize=None)
     def _get_beta(self, i):
         """beta_i = log  (c_i + alpha / n_i) / (C + alpha) where
         C = count of patterns
@@ -67,6 +68,7 @@ class BCPNN(BaseEstimator, ClassifierMixin):
 
         return np.log(b)
 
+    @lru_cache(maxsize=None)
     def _get_counts(self, i = None, j = None):
         """Number of times that X_i (and X_j if j is set) appear
         (jointly) in the training set.
@@ -84,10 +86,6 @@ class BCPNN(BaseEstimator, ClassifierMixin):
 
         assert i is not None or j is not None
 
-        # to help with caching always order the args
-        # if j and i > j:
-        #     return self._get_counts(j, i)
-
         counter = 0
 
         if i is not None and j is not None:
@@ -101,7 +99,6 @@ class BCPNN(BaseEstimator, ClassifierMixin):
             for x in self.X_:
                 counter += x[i]
 
-        # TODO cache this to improve perf
         return counter
 
     def _get_weights(self, i, j):
