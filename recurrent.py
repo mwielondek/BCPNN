@@ -9,7 +9,7 @@ class BinvecOneHotEncoder:
         where each individual binary value x_ij represents whether value x_i
         in the original vector was 1 or 0, where j = {1, 0}.
         """
-        X_new = np.empty((X.shape[0],X.shape[1]*2))
+        X_new = np.empty((X.shape[0], X.shape[1]*2))
         for i, pattern in enumerate(X):
             for j, attr in enumerate(pattern):
                 jj = j * 2
@@ -18,6 +18,13 @@ class BinvecOneHotEncoder:
                 else:
                     X_new[i][jj:jj+2] = [0, 1]
         return X_new
+
+    @staticmethod
+    def inverse_transform(X):
+        X_inv = np.empty((X.shape[0], X.shape[1]//2))
+        for i, pattern in enumerate(X):
+            X_inv[i] = pattern[::2]
+        return X_inv
 
 
 class BCPNN:
