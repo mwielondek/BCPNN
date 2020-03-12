@@ -1,4 +1,5 @@
-from recurrent import BCPNN, BinvecOneHotEncoder as encoder
+from recurrent import BCPNN
+from encoder import BinvecOneHotEncoder as encoder
 import numpy as np
 
 
