@@ -25,7 +25,7 @@ class BCPNN(BaseEstimator, ClassifierMixin):
 
         return self
 
-    def predict(self, X):
+    def predict_proba(self, X):
         check_is_fitted(self, attributes=None)
 
         X = check_array(X)
@@ -46,6 +46,13 @@ class BCPNN(BaseEstimator, ClassifierMixin):
 
                 s_values[i][j] = beta + sigma
 
+        def transfer_fn(x):
+            return np.exp(x) if x < 0 else 1
+
+        return np.vectorize(transfer_fn)(s_values)
+
+    def predict(self, X):
+        s_values = self.predict_proba(X)
         highest_prob = list(map(np.argmax, s_values))
         return self.classes_[highest_prob]
 
