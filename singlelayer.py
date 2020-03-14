@@ -1,41 +1,19 @@
 import numpy as np
 
-class BinvecOneHotEncoder:
-
-    @staticmethod
-    def transform(X):
-        """
-        Transforms a vector of binary patterns onto the one hot similar form
-        where each individual binary value x_ij represents whether value x_i
-        in the original vector was 1 or 0, where j = {1, 0}.
-        """
-        X_new = np.empty((X.shape[0], X.shape[1]*2))
-        for i, pattern in enumerate(X):
-            for j, attr in enumerate(pattern):
-                jj = j * 2
-                if attr == 1:
-                    X_new[i][jj:jj+2] = [1, 0]
-                else:
-                    X_new[i][jj:jj+2] = [0, 1]
-        return X_new
-
-    @staticmethod
-    def inverse_transform(X):
-        X_inv = np.empty((X.shape[0], X.shape[1]//2))
-        for i, pattern in enumerate(X):
-            X_inv[i] = pattern[::2]
-        return X_inv
-
-
 class BCPNN:
 
     N_VALUES = 2
 
-    def fit(self, X):
+    def fit(self, X, y):
         self.X_ = X
         self.n_samples_, self.n_features_ = X.shape
 
-    def update(self, X):
+        self.y_ = y
+        self.classes_ = self._unique_labels(y)
+        self.n_classes_ = self.classes_.shape[0]
+
+    def predict_proba(self, X):
+        # TBC ... - needs revising 
         activations = np.empty_like(X)
         for i, _ in enumerate(activations):
 
@@ -57,21 +35,9 @@ class BCPNN:
         # normalize output in each hypercolumn
         return self._normalize(activations)
 
-
-    def retrieve(self, X):
-        Y = np.empty_like(X)
-        for i, pattern in enumerate(X):
-
-            y = np.empty_like(pattern)
-            old = pattern
-
-            while not np.allclose(old, y):
-                old = y
-                y = self.update(y)
-
-            Y[i] = y
-
-        return Y
+    @staticmethod
+    def _unique_labels(y):
+        return np.array(sorted(set(y)))
 
     def _get_beta(self, i):
         # log( P( x_i ) )
