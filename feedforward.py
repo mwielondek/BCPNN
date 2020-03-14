@@ -12,8 +12,18 @@ class BCPNN:
         self.classes_ = self._unique_labels(y)
         self.n_classes_ = self.classes_.shape[0]
 
+        # extend X with y values
+        extension = np.zeros((self.n_samples_, self.n_classes_))
+        # necessary padding into X to arrive at the y values
+        self.y_pad = self.n_features_
+
+        for i, cls in enumerate(y):
+            extension[i][cls] = 1
+
+        self.X_ = np.concatenate((self.X_, extension), axis=1)
+
     def predict_proba(self, X):
-        # TBC ... - needs revising 
+        # TBC ... - needs revising
         activations = np.empty_like(X)
         for i, _ in enumerate(activations):
 
