@@ -1,4 +1,4 @@
-from singlelayer import BCPNN
+from feedforward import BCPNN
 from encoder import BinvecOneHotEncoder as encoder
 import numpy as np
 

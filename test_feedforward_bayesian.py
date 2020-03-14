@@ -1,4 +1,4 @@
-from singlelayer_bayesian import BCPNN
+from feedforward_bayesian import BCPNN
 import numpy as np
 
 
