@@ -35,7 +35,7 @@ class BCPNN(BaseEstimator, ClassifierMixin):
         # Yj given observations in A.
         # calc support value s_j = beta_j + Sum_i(w_ji * o_i)
 
-        s_values = np.empty((n_samples, self.n_classes_))
+        support = np.empty((n_samples, self.n_classes_))
         for i, x in enumerate(X):
             for j, cls in enumerate(self.classes_):
                 beta = self._get_beta(cls)
@@ -44,17 +44,20 @@ class BCPNN(BaseEstimator, ClassifierMixin):
                 w_j = partial(self._get_weights, j = cls)
                 sigma = sum(map(w_j, observed_features))
 
-                s_values[i][j] = beta + sigma
+                support[i][j] = beta + sigma
 
         def transfer_fn(x):
             return np.exp(x) if x < 0 else 1
 
-        return np.vectorize(transfer_fn)(s_values)
+        # Outputs activation values (by applying the transfer fn on
+        # the support values). These are in the form of probabilities
+        # for each sample to belong to any given class.
+        return np.vectorize(transfer_fn)(support)
 
     def predict(self, X):
-        s_values = self.predict_proba(X)
-        highest_prob = list(map(np.argmax, s_values))
-        return self.classes_[highest_prob]
+        probabilities = self.predict_proba(X)
+        max_probability_class = list(map(np.argmax, probabilities))
+        return self.classes_[max_probability_class]
 
     @lru_cache(maxsize=None)
     def _get_beta(self, i):
