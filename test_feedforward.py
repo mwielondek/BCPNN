@@ -103,13 +103,13 @@ def test_predict_proba():
     assert output.shape == predictions.shape
     assert (output == predictions).all()
 
-    # def test_predict():
-    #     clf = clf_factory()
-    #     f = clf.predict
-    #
-    #     assert (f(test_pattern) == [0, 1]).all()
-    #
-    #     one_flipped = test_pattern[:]
-    #     one_flipped[0][0] = 0
-    #     one_flipped[1][4] = 1
-    #     assert (f(one_flipped) == [0, 1]).all()
+def test_predict():
+    clf = clf_factory()
+    f = clf.predict
+
+    assert (f(test_pattern) == targets).all()
+
+    # one_flipped = test_pattern[:]
+    # one_flipped[0][0] = 0
+    # one_flipped[1][4] = 1
+    # assert (f(one_flipped) == [0, 1]).all()

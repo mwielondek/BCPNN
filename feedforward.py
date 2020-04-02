@@ -50,6 +50,11 @@ class BCPNN:
 
         return self._transfer_fn(support)
 
+    def predict(self, X):
+        probabilities = self.predict_proba(X)
+        max_probability_class = list(map(np.argmax, probabilities))
+        return self.classes_[max_probability_class]
+
     def _transfer_fn(self, support):
         # calculate the exponential and normalize output in each hypercolumn
         # From Sandberg 2002 (eq 6):
