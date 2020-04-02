@@ -85,31 +85,49 @@ def clf_factory(test_pattern=test_pattern, targets=targets):
     clf.fit(test_pattern, targets)
     return clf
 
-def test_predict_proba():
-    test_pattern = np.array([
-        [1, 0, 1, 0, 0, 1],
-        [1, 0, 0.5, 0.5, 0, 1],
-        [0.7, 0.3, 1, 0, 0, 1],
-        [0, 1, 0, 1, 1, 0],
-        [0.9, 0.1, 0.9, 0.1, 0.1, 0.9]
-        ])
-    targets = np.array([0, 0, 0, 1, 1])
-
+def predict_proba_runner(test_pattern, targets, predictions):
     clf = clf_factory(test_pattern, targets)
     f = clf.predict_proba
-
     output = f(test_pattern)
-    predictions = np.array([[1, 0], [1, 0], [1, 0], [0, 1], [0, 1]])
     assert output.shape == predictions.shape
     assert (output == predictions).all()
 
-def test_predict():
-    clf = clf_factory()
-    f = clf.predict
-
-    assert (f(test_pattern) == targets).all()
-
-    # one_flipped = test_pattern[:]
-    # one_flipped[0][0] = 0
-    # one_flipped[1][4] = 1
-    # assert (f(one_flipped) == [0, 1]).all()
+# def test_predict_proba():
+#     # Test different size fo n_features and n_classes
+#     test_pattern = np.array([
+#         [1, 0, 1, 0],
+#         [1, 0, 1, 0],
+#         [1, 0, 1, 0]
+#         ])
+#     targets = np.array([0, 2, 1])
+#     predictions = np.array([[1, 0], [1, 0], [1, 0]])
+#     predict_proba_runner(test_pattern, targets, predictions)
+#
+# def test_predict_proba():
+#     test_pattern = np.array([
+#         [1, 0, 1, 0, 0, 1],
+#         [1, 0, 0.5, 0.5, 0, 1],
+#         [0.7, 0.3, 1, 0, 0, 1],
+#         [0, 1, 0, 1, 1, 0],
+#         [0.9, 0.1, 0.9, 0.1, 0.1, 0.9]
+#         ])
+#     targets = np.array([0, 0, 0, 1, 1])
+#
+#     clf = clf_factory(test_pattern, targets)
+#     f = clf.predict_proba
+#
+#     output = f(test_pattern)
+#     predictions = np.array([[1, 0], [1, 0], [1, 0], [0, 1], [0, 1]])
+#     assert output.shape == predictions.shape
+#     assert (output == predictions).all()
+#
+# def test_predict():
+#     clf = clf_factory()
+#     f = clf.predict
+#
+#     assert (f(test_pattern) == targets).all()
+#
+#     # one_flipped = test_pattern[:]
+#     # one_flipped[0][0] = 0
+#     # one_flipped[1][4] = 1
+#     # assert (f(one_flipped) == [0, 1]).all()
