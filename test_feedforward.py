@@ -56,6 +56,23 @@ class TestUnitTests:
         assert f(1, self.clf.y_pad + 0) == 0
         assert f(4, self.clf.y_pad + 1) == 0
 
+    def test_unique_label(self):
+        y = [3,4,7,2,2,3]
+        assert (BCPNN._unique_labels(y) == [2,3,4,7]).all()
+
+    def test_transfer_fn(self):
+        f = self.clf._transfer_fn
+
+        support = [0, 0]
+        assert (f(support) == [0.5, 0.5]).all()
+        support = np.log([1, 2, 4, 1])
+        assert (f(support) == [1/3, 2/3, 4/5, 1/5]).all()
+        # test 2d arrays
+        support = [[0, 0], [0, 0]]
+        assert (f(support) == [[0.5, 0.5], [0.5, 0.5]]).all()
+        support = np.log([[1, 2], [4, 1]])
+        assert (f(support) == [[1/3, 2/3], [4/5, 1/5]]).all()
+
 
 test_pattern = np.array([
     [1, 0, 1, 0, 0, 1],
@@ -68,43 +85,31 @@ def clf_factory(test_pattern=test_pattern, targets=targets):
     clf.fit(test_pattern, targets)
     return clf
 
-
-def test_unique_label():
-    y = [3,4,7,2,2,3]
-    assert (BCPNN._unique_labels(y) == [2,3,4,7]).all()
-
-def test_predict():
-    clf = clf_factory()
-    f = clf.predict
-
-    assert (f(test_pattern) == [0, 1]).all()
-
-    one_flipped = test_pattern[:]
-    one_flipped[0][0] = 0
-    one_flipped[1][4] = 1
-    assert (f(one_flipped) == [0, 1]).all()
-
-
 def test_predict_proba():
     test_pattern = np.array([
         [1, 0, 1, 0, 0, 1],
-        [0, 1, 0, 1, 1, 0]
+        [1, 0, 0.5, 0.5, 0, 1],
+        [0.7, 0.3, 1, 0, 0, 1],
+        [0, 1, 0, 1, 1, 0],
+        [0.9, 0.1, 0.9, 0.1, 0.1, 0.9]
         ])
+    targets = np.array([0, 0, 0, 1, 1])
 
-    clf = clf_factory(test_pattern)
+    clf = clf_factory(test_pattern, targets)
     f = clf.predict_proba
 
-    predictions = np.array([[1, 0], [0, 1]])
-    assert (f(test_pattern) == predictions).all()
-#
-# def test_predict_proba2():
-#     test_pattern = np.array([
-#         [1, 0, 1, 0, 0, 1],
-#         [1, 0, 1, 0, 0, 1]
-#         ])
-#
-#     clf = clf_factory(test_pattern)
-#     f = clf.predict_proba
-#
-#     predictions = np.array([[0.5, 0.5], [0.5, 0.5]])
-#     assert (f(test_pattern) == predictions).all()
+    output = f(test_pattern)
+    predictions = np.array([[1, 0], [1, 0], [1, 0], [0, 1], [0, 1]])
+    assert output.shape == predictions.shape
+    assert (output == predictions).all()
+
+    # def test_predict():
+    #     clf = clf_factory()
+    #     f = clf.predict
+    #
+    #     assert (f(test_pattern) == [0, 1]).all()
+    #
+    #     one_flipped = test_pattern[:]
+    #     one_flipped[0][0] = 0
+    #     one_flipped[1][4] = 1
+    #     assert (f(one_flipped) == [0, 1]).all()
