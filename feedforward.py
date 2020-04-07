@@ -29,9 +29,11 @@ class BCPNN:
         for sample_idx, x in enumerate(X):
             for cls_idx, j in enumerate(self.classes_):
                 beta = self._get_beta(j)
+
                 weights = 0
                 for i in range(n_features):
-                    weights += np.log(self._get_weights(j, i) * x[i])
+                    weights += self._get_weights(j, i) * x[i]
+
                 h = beta + weights
                 support[sample_idx][cls_idx] = h
 
@@ -46,7 +48,13 @@ class BCPNN:
         return self.classes_[max_probability_class]
 
     def _transfer_fn(self, support):
-        return np.exp(support)
+        # Since the independence assumption often is only approximately
+        # fulfilled, these equations give only an approximation of the
+        # probability. Therefore the formulas will eventually produce
+        # probability estimates larger than 1. To prevent this, one
+        # alternative is to use a threshold in the transfer function
+        # - Holst 1997 (eq. 2.14)
+        return np.exp(np.where(support > 0, 0, support))
 
     @staticmethod
     def _unique_labels(y):
@@ -80,4 +88,4 @@ class BCPNN:
             return 0
         if cij == 0:
             return np.log(1 / self.n_samples_)
-        return cij / (ci * cj)
+        return np.log( cij / (ci * cj) )
