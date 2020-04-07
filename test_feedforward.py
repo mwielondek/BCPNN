@@ -57,8 +57,8 @@ class TestUnitTests:
         assert f(4, self.clf.y_pad + 1) == 0
 
     def test_unique_label(self):
-        y = [3,4,7,2,2,3]
-        assert (BCPNN._unique_labels(y) == [2,3,4,7]).all()
+        y = [3,4,1,5,6,7,2,2,3]
+        assert (BCPNN._unique_labels(y) == [1,2,3,4,5,6,7]).all()
 
     def test_transfer_fn(self):
         g = self.clf._transfer_fn
@@ -293,4 +293,21 @@ class TestProba:
         self.predict_runner(test_pattern, targets, predictions, mode='proba')
         # predict
         predictions = np.array([0, 1, 2])
+        self.predict_runner(test_pattern, targets, predictions, mode='predict')
+
+    def test_different_sizes5(self):
+        # Test different size of n_features and n_classes
+        # n_features = 3, n_classes = 3
+        test_pattern = np.array([
+            [1, 0, 1],
+            [1, 0, 1],
+            [0, 1, 0]
+            ])
+        targets = np.array([0, 2, 1])
+
+        # predict_proba
+        predictions = np.array([[1, 0, 1], [1, 0, 1], [0, 1, 0]])
+        self.predict_runner(test_pattern, targets, predictions, mode='proba')
+        # predict
+        predictions = np.array([0, 0, 1])
         self.predict_runner(test_pattern, targets, predictions, mode='predict')

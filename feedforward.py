@@ -61,7 +61,10 @@ class BCPNN:
 
     @staticmethod
     def _unique_labels(y):
-        return np.array(sorted(set(y)))
+        labels = np.array(sorted(set(y)))
+        # check we didn't skip any values, ie it must follow 0,1,2,3,...
+        assert sum(labels) == sum(range(labels[-1] + 1))
+        return labels
 
     def _get_beta(self, i):
         # log( P( x_i ) )
