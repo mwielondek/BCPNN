@@ -61,17 +61,18 @@ class TestUnitTests:
         assert (BCPNN._unique_labels(y) == [2,3,4,7]).all()
 
     def test_transfer_fn(self):
-        f = self.clf._transfer_fn
+        g = self.clf._transfer_fn
+        f = lambda s: g(np.array(s))
 
         support = [0, 0]
         assert (f(support) == [1, 1]).all()
         support = np.log([1, 2, 4, 1])
-        assert (f(support) == [1, 2, 4, 1]).all()
+        assert (f(support) == [1, 1, 1, 1]).all()
         # test 2d arrays
         support = [[0, 0], [0, 0]]
         assert (f(support) == [[1, 1], [1, 1]]).all()
         support = np.log([[1, 2], [4, 1]])
-        assert (f(support) == [[1, 2], [4, 1]]).all()
+        assert (f(support) == [[1, 1], [1, 1]]).all()
 
 
 test_pattern = np.array([
@@ -92,11 +93,13 @@ def predict_runner(test_pattern, targets, predictions, mode='proba'):
     elif mode == 'log':
         f = clf.predict_log_proba
     elif mode == 'predict':
-        f = clf.predict_predict
+        f = clf.predict
 
     output = f(test_pattern)
     assert output.shape == predictions.shape
-    assert (output == predictions).all()
+    # NOTE: below form easier to debug
+    # assert (output == predictions).all()
+    assert np.allclose(output, predictions)
 
 def test_predict_proba():
     # Test different size fo n_features and n_classes
@@ -107,11 +110,12 @@ def test_predict_proba():
     targets = np.array([0, 1])
 
     # predict_log_proba
-    predictions = np.array([[1, 0], [0, 1]])
+    predictions = np.array([[ 0.69314718, -2.07944154],
+                            [-2.07944154,  0.69314718]])
     predict_runner(test_pattern, targets, predictions, mode='log')
     # predict_proba
-    predictions = np.array([[1, 0], [0, 1]])
+    predictions = np.array([[1, 0.125], [0.125, 1]])
     predict_runner(test_pattern, targets, predictions, mode='proba')
     # predict
-    predictions = np.array([[1, 0], [0, 1]])
+    predictions = np.array([0, 1])
     predict_runner(test_pattern, targets, predictions, mode='predict')
