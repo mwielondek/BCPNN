@@ -2,9 +2,6 @@ import numpy as np
 
 class BCPNN:
 
-    # Num possible values for each feature
-    N_VALUES = 2
-
     def fit(self, X, y):
         assert X.shape[0] == y.shape[0]
 
@@ -25,30 +22,23 @@ class BCPNN:
 
         self.X_ = np.concatenate((self.X_, extension), axis=1)
 
-    def predict_proba(self, X):
+    def predict_log_proba(self, X):
         n_samples, n_features = X.shape
 
         support = np.empty((n_samples, self.n_classes_))
         for sample_idx, x in enumerate(X):
             for cls_idx, j in enumerate(self.classes_):
                 beta = self._get_beta(j)
-
-                # from Sandberg 2002 (equation 3):
-                #        sigma = sum_i (log ( sum_i' ( w_ij * P_X(x_i) ) ))
-                # over hypercolumns ^         ^ over neurons in each hypercolumn
-                outer_sum = 0
-                for i in range(0, n_features, self.N_VALUES):
-                    inner_sum = 0
-                    for k in range(self.N_VALUES):
-                        prod = self._get_weights(i + k, j)
-                        prod *= x[i + k]
-                        inner_sum += prod
-                    outer_sum += np.log(inner_sum)
-
-                h = beta + outer_sum
+                weights = 0
+                for i in range(n_features):
+                    weights += np.log(self._get_weights(j, i) * x[i])
+                h = beta + weights
                 support[sample_idx][cls_idx] = h
 
-        return self._transfer_fn(support)
+        return support
+
+    def predict_proba(self, X):
+        return self._transfer_fn(self.predict_log_proba(X))
 
     def predict(self, X):
         probabilities = self.predict_proba(X)
@@ -56,18 +46,7 @@ class BCPNN:
         return self.classes_[max_probability_class]
 
     def _transfer_fn(self, support):
-        # calculate the exponential and normalize output in each hypercolumn
-        # From Sandberg 2002 (eq 6):
-        #     e^hjj' / sum_j' ( e^hjj' )
-        activations = np.exp(support).T
-
-        for i in range(0, activations.shape[0], self.N_VALUES):
-            denominator = sum(activations[i:i + self.N_VALUES])
-
-            for k in range(self.N_VALUES):
-                activations[i + k] /= denominator
-
-        return activations.T
+        return np.exp(support)
 
     @staticmethod
     def _unique_labels(y):
