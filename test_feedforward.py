@@ -74,48 +74,64 @@ class TestUnitTests:
         support = np.log([[1, 2], [4, 1]])
         assert (f(support) == [[1, 1], [1, 1]]).all()
 
+class TestProba:
 
-test_pattern = np.array([
-    [1, 0, 1, 0, 0, 1],
-    [1, 0, 0, 1, 0, 1]
-    ])
-targets = np.array([0, 1])
-
-def clf_factory(test_pattern=test_pattern, targets=targets):
-    clf = BCPNN()
-    clf.fit(test_pattern, targets)
-    return clf
-
-def predict_runner(test_pattern, targets, predictions, mode='proba'):
-    clf = clf_factory(test_pattern, targets)
-    if mode == 'proba':
-        f = clf.predict_proba
-    elif mode == 'log':
-        f = clf.predict_log_proba
-    elif mode == 'predict':
-        f = clf.predict
-
-    output = f(test_pattern)
-    assert output.shape == predictions.shape
-    # NOTE: below form easier to debug
-    # assert (output == predictions).all()
-    assert np.allclose(output, predictions)
-
-def test_predict_proba():
-    # Test different size fo n_features and n_classes
     test_pattern = np.array([
-        [1, 0, 1, 0],
-        [0, 1, 0, 1]
+        [1, 0, 1, 0, 0, 1],
+        [1, 0, 0, 1, 0, 1]
         ])
     targets = np.array([0, 1])
 
-    # predict_log_proba
-    predictions = np.array([[ 0.69314718, -2.07944154],
-                            [-2.07944154,  0.69314718]])
-    predict_runner(test_pattern, targets, predictions, mode='log')
-    # predict_proba
-    predictions = np.array([[1, 0.125], [0.125, 1]])
-    predict_runner(test_pattern, targets, predictions, mode='proba')
-    # predict
-    predictions = np.array([0, 1])
-    predict_runner(test_pattern, targets, predictions, mode='predict')
+    def clf_factory(self, test_pattern=test_pattern, targets=targets):
+        clf = BCPNN()
+        clf.fit(test_pattern, targets)
+        return clf
+
+    def predict_runner(self, test_pattern, targets, predictions, mode='proba'):
+        clf = self.clf_factory(test_pattern, targets)
+        if mode == 'proba':
+            f = clf.predict_proba
+        elif mode == 'log':
+            f = clf.predict_log_proba
+        elif mode == 'predict':
+            f = clf.predict
+
+        output = f(test_pattern)
+        assert output.shape == predictions.shape
+        # NOTE: below form easier to debug
+        # assert (output == predictions).all()
+        assert np.allclose(output, predictions, atol=0.4)
+
+    def test_basic(self):
+        test_pattern = np.array([
+            [1, 0, 1, 0],
+            [0, 1, 0, 1]
+            ])
+        targets = np.array([0, 1])
+
+        # predict_log_proba
+        predictions = np.array([[ 0.69314718, -2.07944154],
+                                [-2.07944154,  0.69314718]])
+        self.predict_runner(test_pattern, targets, predictions, mode='log')
+        # predict_proba
+        predictions = np.array([[1, 0.125], [0.125, 1]])
+        self.predict_runner(test_pattern, targets, predictions, mode='proba')
+        # predict
+        predictions = np.array([0, 1])
+        self.predict_runner(test_pattern, targets, predictions, mode='predict')
+
+    def test_different_sizes(self):
+        # Test different size of n_features and n_classes
+        test_pattern = np.array([
+            [1, 0, 1, 0],
+            [1, 0, 1, 0],
+            [0, 1, 0, 1]
+            ])
+        targets = np.array([0, 0, 1])
+
+        # predict_proba
+        predictions = np.array([[1, 0], [1, 0], [0, 1]])
+        self.predict_runner(test_pattern, targets, predictions, mode='proba')
+        # predict
+        predictions = np.array([0, 0, 1])
+        self.predict_runner(test_pattern, targets, predictions, mode='predict')
