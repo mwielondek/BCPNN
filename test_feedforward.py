@@ -106,7 +106,7 @@ class TestProba:
         # assert (output == predictions).all()
         assert np.allclose(output, predictions, atol=atol)
 
-    def test_basic(self):
+    def test_basic1(self):
         test_pattern = np.array([
             [1, 0, 1, 0],
             [0, 1, 0, 1]
@@ -142,6 +142,90 @@ class TestProba:
         predictions = np.array([0, 1, 0])
         self.predict_runner(train_pattern, targets, predictions,
                     test_pattern=test_pattern, mode='predict')
+
+    def test_basic3(self):
+        train_pattern = np.array([
+            [1, 0, 1],
+            [0, 1, 0]
+            ])
+        targets = np.array([0, 1])
+
+        test_pattern = np.append(train_pattern, [[1, 1, 1]], axis=0)
+
+        # predict_proba
+        predictions = np.array([[1, 0], [0, 1], [0.8, 0.4]])
+        self.predict_runner(train_pattern, targets, predictions,
+                    test_pattern=test_pattern, mode='proba')
+        # predict
+        predictions = np.array([0, 1, 0])
+        self.predict_runner(train_pattern, targets, predictions,
+                    test_pattern=test_pattern, mode='predict')
+
+    def test_basic4(self):
+        train_pattern = np.array([
+            [1, 0, 0],
+            [0, 1, 0]
+            ])
+        targets = np.array([0, 1])
+
+        # TEST CASE
+        test_pattern = np.append(train_pattern, [[0, 0, 1]], axis=0)
+
+        # predict_proba
+        predictions = np.array([[1, 0], [0, 1], [0.5, 0.5]])
+        self.predict_runner(train_pattern, targets, predictions,
+                    test_pattern=test_pattern, mode='proba', atol=0.25)
+        # predict
+        predictions = np.array([0, 1, 0])
+        self.predict_runner(train_pattern, targets, predictions,
+                    test_pattern=test_pattern, mode='predict')
+
+        # TEST CASE
+        test_pattern = np.append(train_pattern, [[0, 0, 0]], axis=0)
+        # predict_proba
+        predictions = np.array([[1, 0], [0, 1], [0.5, 0.5]])
+        self.predict_runner(train_pattern, targets, predictions,
+                    test_pattern=test_pattern, mode='proba', atol=0.25)
+        # predict
+        predictions = np.array([0, 1, 0])
+        self.predict_runner(train_pattern, targets, predictions,
+                    test_pattern=test_pattern, mode='predict')
+
+    def test_basic5(self):
+        train_pattern = np.array([
+            [1, 0, 0],
+            [0, 1, 0],
+            [0, 0, 1]
+            ])
+        targets = np.array([0, 1, 2])
+
+        # TEST CASE
+        test_pattern = np.append(train_pattern, [[0, 0, 0]], axis=0)
+
+        # predict_proba
+        predictions = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1], [0.5, 0.5, 0.5]])
+        self.predict_runner(train_pattern, targets, predictions,
+                    test_pattern=test_pattern, mode='proba', atol=0.2)
+        # predict
+        predictions = np.array([0, 1, 2, 0])
+        self.predict_runner(train_pattern, targets, predictions,
+                    test_pattern=test_pattern, mode='predict')
+
+        # TEST CASE
+        test_pattern = np.append(train_pattern, [[1, 1, 1]], axis=0)
+
+        # predict_proba
+        predictions = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1], [0.3, 0.3, 0.3]])
+        self.predict_runner(train_pattern, targets, predictions,
+                    test_pattern=test_pattern, mode='proba', atol=0.2)
+
+        # TEST CASE
+        test_pattern = np.append(train_pattern, [[1, 0, 1]], axis=0)
+
+        # predict_proba
+        predictions = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1], [0.3, 0, 0.3]])
+        self.predict_runner(train_pattern, targets, predictions,
+                    test_pattern=test_pattern, mode='proba', atol=0.2)
 
     def test_different_sizes1(self):
         # Test different size of n_features and n_classes
