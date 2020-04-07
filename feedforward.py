@@ -28,6 +28,9 @@ class BCPNN:
         support = np.empty((n_samples, self.n_classes_))
         for sample_idx, x in enumerate(X):
             for cls_idx, j in enumerate(self.classes_):
+                # pad to arrive at y values in X - see fit method
+                j = self.y_pad + j
+
                 beta = self._get_beta(j)
 
                 weights = 0

@@ -87,15 +87,18 @@ class TestProba:
         clf.fit(test_pattern, targets)
         return clf
 
-    def predict_runner(self, test_pattern, targets, predictions,
-                        mode='proba', atol=0.4):
-        clf = self.clf_factory(test_pattern, targets)
+    def predict_runner(self, train_pattern, targets, predictions,
+                test_pattern=None, mode='proba', atol=0.4):
+        clf = self.clf_factory(train_pattern, targets)
         if mode == 'proba':
             f = clf.predict_proba
         elif mode == 'log':
             f = clf.predict_log_proba
         elif mode == 'predict':
             f = clf.predict
+
+        if test_pattern is None:
+            test_pattern = train_pattern
 
         output = f(test_pattern)
         assert output.shape == predictions.shape
@@ -123,19 +126,22 @@ class TestProba:
         self.predict_runner(test_pattern, targets, predictions, mode='predict')
 
     def test_basic2(self):
-        test_pattern = np.array([
+        train_pattern = np.array([
             [1, 0, 1, 0],
-            [1, 1, 1, 1],
             [0, 1, 0, 1]
             ])
-        targets = np.array([0, 0, 1])
+        targets = np.array([0, 1])
+
+        test_pattern = np.append(train_pattern, [[1, 1, 1, 1]], axis=0)
 
         # predict_proba
-        predictions = np.array([[1, 0], [1, 1], [0, 1]])
-        self.predict_runner(test_pattern, targets, predictions, mode='proba')
+        predictions = np.array([[1, 0], [0, 1], [0.5, 0.5]])
+        self.predict_runner(train_pattern, targets, predictions,
+                    test_pattern=test_pattern, mode='proba')
         # predict
-        predictions = np.array([0, 0, 1])
-        self.predict_runner(test_pattern, targets, predictions, mode='predict')
+        predictions = np.array([0, 1, 0])
+        self.predict_runner(train_pattern, targets, predictions,
+                    test_pattern=test_pattern, mode='predict')
 
     def test_different_sizes1(self):
         # Test different size of n_features and n_classes
@@ -171,36 +177,36 @@ class TestProba:
         predictions = np.array([0, 1, 2])
         self.predict_runner(test_pattern, targets, predictions, mode='predict')
 
-    # def test_different_sizes3(self):
-    #     # Test different size of n_features and n_classes
-    #     # n_features = 3, n_classes = 3
-    #     test_pattern = np.array([
-    #         [1, 0, 1],
-    #         [1, 0, 1],
-    #         [0, 1, 0]
-    #         ])
-    #     targets = np.array([0, 1, 2])
-    #
-    #     # predict_proba
-    #     predictions = np.array([[1, 0, 0], [1, 0, 0], [1, 0, 0]])
-    #     self.predict_runner(test_pattern, targets, predictions, mode='proba')
-    #     # predict
-    #     predictions = np.array([0, 0, 1])
-    #     self.predict_runner(test_pattern, targets, predictions, mode='predict')
-    #
-    # def test_different_sizes4(self):
-    #     # Test different size of n_features and n_classes
-    #     # n_features = 4, n_classes = 3
-    #     test_pattern = np.array([
-    #         [1, 0, 1, 0, 0, 0, 0],
-    #         [0, 0, 0, 0, 1, 1, 1],
-    #         [0, 1, 0, 1, 0, 0, 0]
-    #         ])
-    #     targets = np.array([0, 1, 2])
-    #
-    #     # predict_proba
-    #     predictions = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
-    #     self.predict_runner(test_pattern, targets, predictions, mode='proba')
-    #     # predict
-    #     predictions = np.array([0, 1, 2])
-    #     self.predict_runner(test_pattern, targets, predictions, mode='predict')
+    def test_different_sizes3(self):
+        # Test different size of n_features and n_classes
+        # n_features = 3, n_classes = 3
+        test_pattern = np.array([
+            [1, 0, 1],
+            [1, 0, 1],
+            [0, 1, 0]
+            ])
+        targets = np.array([0, 2, 1])
+
+        # predict_proba
+        predictions = np.array([[1, 0, 1], [1, 0, 1], [0, 1, 0]])
+        self.predict_runner(test_pattern, targets, predictions, mode='proba')
+        # predict
+        predictions = np.array([0, 0, 1])
+        self.predict_runner(test_pattern, targets, predictions, mode='predict')
+
+    def test_different_sizes4(self):
+        # Test different size of n_features and n_classes
+        # n_features = 4, n_classes = 3
+        test_pattern = np.array([
+            [1, 0, 1, 0, 0, 0, 0],
+            [0, 0, 0, 0, 1, 1, 1],
+            [0, 1, 0, 1, 0, 0, 0]
+            ])
+        targets = np.array([0, 1, 2])
+
+        # predict_proba
+        predictions = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
+        self.predict_runner(test_pattern, targets, predictions, mode='proba')
+        # predict
+        predictions = np.array([0, 1, 2])
+        self.predict_runner(test_pattern, targets, predictions, mode='predict')
