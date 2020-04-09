@@ -2,25 +2,32 @@ import numpy as np
 
 class BCPNN:
 
-    def fit(self, X, y):
-        assert X.shape[0] == y.shape[0]
+    def fit(self, X, Y):
+        """Where X is an array of samples and Y is either
+
+        - an array of probabilities of respective sample belonging to each class
+        OR
+        - an array of class indices to which each samples belongs to (assuming
+         100% confidence)
+        """
+
+        assert X.shape[0] == Y.shape[0]
 
         self.X_ = X
         self.n_samples_, self.n_features_ = X.shape
 
-        self.y_ = y
-        self.classes_ = self._unique_labels(y)
+        if Y.ndim == 1:
+            self.classes_ = self._unique_labels(Y)
+            self.Y_ = self._class_idx_to_prob(Y)
+        else:
+            self.Y_ = Y
+            self.classes_ = np.arange(Y.shape[1])
         self.n_classes_ = self.classes_.shape[0]
 
         # extend X with y values
-        extension = np.zeros((self.n_samples_, self.n_classes_))
+        self.X_ = np.concatenate((self.X_, self.Y_), axis=1)
         # necessary padding into X to arrive at the y values
         self.y_pad = self.n_features_
-
-        for i, cls in enumerate(y):
-            extension[i][cls] = 1
-
-        self.X_ = np.concatenate((self.X_, extension), axis=1)
 
     def predict_log_proba(self, X):
         n_samples, n_features = X.shape
@@ -65,6 +72,22 @@ class BCPNN:
         # check we didn't skip any values, ie it must follow 0,1,2,3,...
         assert sum(labels) == sum(range(labels[-1] + 1))
         return labels
+
+    @staticmethod
+    def _class_idx_to_prob(y):
+        """Receives a 1D array of class indexes and returns a 2D array of the
+        shape (n_samples, n_classes) with probability values for each sample
+        belogning to given class
+        """
+        classes = set(y)
+
+        # make sure each class is represented at least once 0,1,2,...
+        assert classes == set(range(max(y) + 1))
+
+        Y = np.zeros(tuple(map(lambda x: len(x), [y, classes])))
+        for i, cls_idx in enumerate(y):
+            Y[i][cls_idx] = 1
+        return Y
 
     def _get_beta(self, i):
         # log( P( x_i ) )

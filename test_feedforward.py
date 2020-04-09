@@ -60,6 +60,19 @@ class TestUnitTests:
         y = [3,4,1,5,6,7,2,2,3]
         assert (BCPNN._unique_labels(y) == [1,2,3,4,5,6,7]).all()
 
+    def test_class_idx_to_prob(self):
+        y = np.arange(3)
+        prediction = np.eye(3)
+        assert (BCPNN._class_idx_to_prob(y) == prediction).all()
+
+        y = np.array([1, 2, 0])
+        prediction = np.array([[0, 1, 0], [0, 0, 1], [1, 0, 0]])
+        assert (BCPNN._class_idx_to_prob(y) == prediction).all()
+
+        y = np.array([1, 1, 0])
+        prediction = np.array([[0, 1], [0,1], [1, 0]])
+        assert (BCPNN._class_idx_to_prob(y) == prediction).all()
+
     def test_transfer_fn(self):
         g = self.clf._transfer_fn
         f = lambda s: g(np.array(s))
