@@ -10,7 +10,6 @@ class BCPNN(FF_BCPNN):
     def fit(self, X):
         n_samples, n_features = X.shape
         super().fit(X, X)
-        print(self.n_classes_)
 
     def predict(self, X):
         input = X
