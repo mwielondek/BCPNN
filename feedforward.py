@@ -57,6 +57,9 @@ class BCPNN:
         max_probability_class = list(map(np.argmax, probabilities))
         return self.classes_[max_probability_class]
 
+    def score(self, X, y):
+        return (self.predict(X) == y).sum() / len(y)
+
     def _transfer_fn(self, support):
         # Since the independence assumption often is only approximately
         # fulfilled, these equations give only an approximation of the
