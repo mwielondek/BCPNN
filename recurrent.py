@@ -26,5 +26,8 @@ class BCPNN(FF_BCPNN):
             input = self._proba_to_bin(input, self.PROB_THRESHOLD)
         return input
 
+    def score(self, X, y):
+        return (self.predict(X, return_binary=True) == y).sum() / X.size
+
     def _proba_to_bin(self, x, threshold):
         return np.where(x >= threshold, 1, 0)
