@@ -25,8 +25,15 @@ class BCPNN(FF_BCPNN):
             input = self._proba_to_bin(input, self.PROB_THRESHOLD)
         return input
 
-    def score(self, X, y):
-        return (self.predict(X, return_binary=True) == y).sum() / X.size
+    def score(self, X, y, mode='features'):
+        """Returns the accuracy score for the classifier. Mode denotes
+        whether we count correct number of features or number of fully
+        recovered samples."""
+        if mode == 'features':
+            return (self.predict(X, return_binary=True) == y).sum() / X.size
+        elif mode == 'samples':
+            return np.all(self.predict(X, return_binary=True) == y, axis = 1) \
+                     .sum() / X.shape[0]
 
     def _proba_to_bin(self, x, threshold):
         return np.where(x >= threshold, 1, 0)
