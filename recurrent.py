@@ -22,7 +22,7 @@ class BCPNN(FF_BCPNN):
             input = self.predict_proba(prev)
             iter += 1
         if return_binary:
-            input = self._proba_to_bin(input, self.PROB_THRESHOLD)
+            input = self._binarize(input, self.PROB_THRESHOLD)
         return input
 
     def score(self, X, y, mode='features'):
@@ -35,5 +35,5 @@ class BCPNN(FF_BCPNN):
             return np.all(self.predict(X, return_binary=True) == y, axis = 1) \
                      .sum() / X.shape[0]
 
-    def _proba_to_bin(self, x, threshold):
+    def _binarize(self, x, threshold=0.5):
         return np.where(x >= threshold, 1, 0)
