@@ -17,7 +17,7 @@ class BCPNN(FF_BCPNN):
         prev = np.empty_like(X)
         iter = 0
         while  (iter < self.MAX_ITER and \
-                not np.allclose(input, prev, atol=self.TOL)):
+                not np.allclose(input, prev, atol=self.TOL, rtol=0)):
             prev = input
             input = self.predict_proba(prev)
             iter += 1
