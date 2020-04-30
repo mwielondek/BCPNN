@@ -2,6 +2,11 @@ import numpy as np
 from feedforward import BCPNN as FF_BCPNN
 
 class BCPNN(FF_BCPNN):
+    """ A recurrent version of the Bayesian Confidence
+    Propagation Neural Network (BCPNN).
+
+    @author M. Wielondek
+    """
 
     def __init__(self, max_iter=1e3, tol=1e-4, prob_threshold=0.5):
         self.MAX_ITER = max_iter
