@@ -5,9 +5,12 @@ class BinvecOneHotEncoder:
     @staticmethod
     def transform(X):
         """
-        Transforms a vector of binary patterns onto the one hot similar form
-        where each individual binary value x_ij represents whether value x_i
-        in the original vector was 1 or 0, where j = {1, 0}.
+        Transforms a vector of binary patterns onto the one hot similar form,
+        translating each binary value x_i into separate binary values x_ia and
+        x_ib, each representing whether x_i was true or false respectively.
+
+        >>> BinvecOneHotEncoder.transform([[1, 0]])
+        array([[1, 0, 0, 1]])
         """
         X = np.array(X)
         X_new = np.empty((X.shape[0], X.shape[1]*2))
