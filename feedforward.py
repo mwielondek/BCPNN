@@ -140,3 +140,16 @@ class BCPNN:
         if cij == 0:
             return np.log(1 / self.n_samples_)
         return np.log( cij / (ci * cj) )
+
+    """
+     For compatibility with sklearn, below are
+     needed to conform to Estimator type.
+    """
+    def get_params(self, deep=True):
+        # BCPNN takes no init arguments
+        return {}
+
+    def set_params(self, **parameters):
+        for parameter, value in parameters.items():
+            setattr(self, parameter, value)
+        return self
