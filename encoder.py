@@ -1,6 +1,17 @@
 import numpy as np
 
 class BinvecOneHotEncoder:
+    """
+    Encodes data onto the format:
+    1 -> [1, 0]
+    0 -> [0, 1]
+    unknown -> [0, 0]
+
+    This allows for specifying which data is available to us; whereas previously
+    we were only able to indicate true values (1) or abscence of data (0), we
+    are now able to indicate false known values ([0, 1]) and distinguish those
+    from absence of data ([0, 0]).
+    """
 
     @staticmethod
     def transform(X):
