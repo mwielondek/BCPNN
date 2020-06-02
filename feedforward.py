@@ -80,10 +80,12 @@ class BCPNN:
         # Since the independence assumption often is only approximately
         # fulfilled, these equations give only an approximation of the
         # probability. Therefore the formulas will eventually produce
-        # probability estimates larger than 1. To prevent this, one
-        # alternative is to use a threshold in the transfer function
-        # - Holst 1997 (eq. 2.14)
-        return np.exp(np.where(support > 0, 0, support))
+        # probability estimates larger than 1. To prevent this, we can
+        # normalize the output over the hypercolumn (Holst 1997).
+        expsup = np.exp(support)
+        for sample_idx, sample in enumerate(expsup):
+            expsup[sample_idx] /= sample.sum()
+        return expsup
 
     @staticmethod
     def _unique_labels(y):
