@@ -158,15 +158,15 @@ class TestProba:
 
     def test_basic3(self):
         train_pattern = np.array([
-            [1, 0, 1],
-            [0, 1, 0]
+            [1, 0, 0],
+            [0, 1, 0],
             ])
         targets = np.array([0, 1])
 
         test_pattern = np.append(train_pattern, [[1, 1, 1], [1, 1, 0]], axis=0)
 
         # predict_proba
-        predictions = np.array([[1, 0], [0, 1], [0.8, 0.2], [0.5, 0.5]])
+        predictions = np.array([[1, 0], [0, 1], [0.5, 0.5], [0.5, 0.5]])
         self.predict_runner(train_pattern, targets, predictions,
                     test_pattern=test_pattern, mode='proba')
         # predict
@@ -174,24 +174,24 @@ class TestProba:
         self.predict_runner(train_pattern, targets, predictions,
                     test_pattern=test_pattern, mode='predict')
 
-    def test_basic3_with_transform(self):
+    def test_basic3_2(self):
         train_pattern = np.array([
             [1, 0, 1],
+            [0, 1, 0],
+            # we add one more sample of cls 1, as for both classes to
+            # have equal amount of active features
             [0, 1, 0]
             ])
-        targets = np.array([0, 1])
+        targets = np.array([0, 1, 1])
 
         test_pattern = np.append(train_pattern, [[1, 1, 1], [1, 1, 0]], axis=0)
 
-        train_pattern = encoder.transform(train_pattern)
-        test_pattern = encoder.transform(test_pattern)
-
         # predict_proba
-        predictions = np.array([[1, 0], [0, 1], [0.7, 0.3], [0.3, 0.7]])
+        predictions = np.array([[1, 0], [0, 1], [0, 1], [0.8, 0.2], [0.5, 0.5]])
         self.predict_runner(train_pattern, targets, predictions,
                     test_pattern=test_pattern, mode='proba')
         # predict
-        predictions = np.array([0, 1, 0, 1])
+        predictions = np.array([0, 1, 1, 0, 0])
         self.predict_runner(train_pattern, targets, predictions,
                     test_pattern=test_pattern, mode='predict')
 
@@ -328,3 +328,70 @@ class TestProba:
         # predict
         predictions = np.array([0, 1, 2])
         self.predict_runner(test_pattern, targets, predictions, mode='predict')
+
+    # Encoder tests
+    def test_encoder_effect_1(self):
+        # extension of basic_3
+
+        train_pattern = np.array([
+            [1, 0, 1],
+            [0, 1, 0]
+            ])
+        targets = np.array([0, 1])
+
+        test_pattern = np.append(train_pattern, [[1, 1, 1], [1, 1, 0]], axis=0)
+
+        train_pattern = encoder.transform(train_pattern)
+        test_pattern = encoder.transform(test_pattern)
+
+        # predict_proba
+        predictions = np.array([[1, 0], [0, 1], [0.7, 0.3], [0.3, 0.7]])
+        self.predict_runner(train_pattern, targets, predictions,
+                    test_pattern=test_pattern, mode='proba')
+        # predict
+        predictions = np.array([0, 1, 0, 1])
+        self.predict_runner(train_pattern, targets, predictions,
+                    test_pattern=test_pattern, mode='predict')
+
+    def test_encoder_effect_2(self):
+        # extension of  test_different_sizes3
+
+        test_pattern = np.array([
+            [1, 0, 1],
+            [1, 0, 1],
+            [0, 1, 0]
+            ])
+        targets = np.array([0, 2, 1])
+
+        # train_pattern = encoder.transform(train_pattern)
+        test_pattern = encoder.transform(test_pattern)
+
+        # predict_proba
+        predictions = np.array([[0.5, 0, 0.5], [0.5, 0, 0.5], [0, 1, 0]])
+        self.predict_runner(test_pattern, targets, predictions, mode='proba')
+        # predict
+        predictions = np.array([0, 0, 1])
+        self.predict_runner(test_pattern, targets, predictions, mode='predict')
+
+    def test_encoder_effect_3(self):
+        train_pattern = np.array([
+            [1, 0, 0],
+            [0, 1, 0],
+            [0, 0, 1]
+            ])
+        targets = np.array([0, 1, 2])
+
+        test_pattern = np.append(train_pattern, [[1, 1, 1], [1, 1, 0]], axis=0)
+
+        train_pattern = encoder.transform(train_pattern)
+        test_pattern = encoder.transform(test_pattern)
+
+        # predict_proba
+        predictions = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1],
+                            [0.33, 0.33, 0.33], [0.5, 0.5, 0]])
+        self.predict_runner(train_pattern, targets, predictions,
+                    test_pattern=test_pattern, mode='proba')
+        # predict
+        predictions = np.array([0, 1, 2, 0, 0])
+        self.predict_runner(train_pattern, targets, predictions,
+                    test_pattern=test_pattern, mode='predict')
