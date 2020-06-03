@@ -10,6 +10,11 @@ class BCPNN:
     @author: M. Wielondek
     """
 
+    def __init__(self, gval=1):
+        # Controls number of clusters, as per "CLUSTERING OF STORED MEMORIES
+        # IN AN ATTRACTOR NETWORK WITH LOCAL COMPETITION", A. Lansner, 2006.
+        self.G = gval
+
     def fit(self, X, Y):
         """Where X is an array of samples and Y is either:
 
@@ -81,9 +86,10 @@ class BCPNN:
         # fulfilled, these equations give only an approximation of the
         # probability. Therefore the formulas will eventually produce
         # probability estimates larger than 1. To prevent this, we can
-        # normalize the output over the hypercolumn (Holst 1997).
-        expsup = np.exp(support)
+        # normalize the output over the hypercolumn (Holst 1997, eq 2.15).
+        expsup = np.exp(support * self.G)
         for sample_idx, sample in enumerate(expsup):
+            assert sample.sum() > 0
             expsup[sample_idx] /= sample.sum()
         return expsup
 
@@ -149,7 +155,7 @@ class BCPNN:
     """
     def get_params(self, deep=True):
         # BCPNN takes no init arguments
-        return {}
+        return {"G-value": self.G}
 
     def set_params(self, **parameters):
         for parameter, value in parameters.items():
