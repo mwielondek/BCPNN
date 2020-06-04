@@ -10,10 +10,12 @@ class BCPNN:
     @author: M. Wielondek
     """
 
-    def __init__(self, gval=1):
+    def __init__(self, normalize=True, g=1):
+        # Whether to use threshold fn or normalize the output in transfer fn
+        self.normalize = normalize
         # Controls number of clusters, as per "CLUSTERING OF STORED MEMORIES
         # IN AN ATTRACTOR NETWORK WITH LOCAL COMPETITION", A. Lansner, 2006.
-        self.G = gval
+        self.g = g
 
     def fit(self, X, Y):
         """Where X is an array of samples and Y is either:
@@ -85,9 +87,14 @@ class BCPNN:
         # Since the independence assumption often is only approximately
         # fulfilled, these equations give only an approximation of the
         # probability. Therefore the formulas will eventually produce
-        # probability estimates larger than 1. To prevent this, we can
-        # normalize the output over the hypercolumn (Holst 1997, eq 2.15).
-        expsup = np.exp(support * self.G)
+        # probability estimates larger than 1. To prevent this, one
+        # alternative is to use a threshold in the transfer function
+        # (Holst 1997, eq. 2.14)
+        if not self.normalize:
+            return np.exp(np.where(support > 0, 0, support))
+
+        # Or we can normalize the output over the hypercolumn (eq 2.15).
+        expsup = np.exp(support * self.g)
         for sample_idx, sample in enumerate(expsup):
             assert sample.sum() > 0
             expsup[sample_idx] /= sample.sum()
@@ -155,7 +162,7 @@ class BCPNN:
     """
     def get_params(self, deep=True):
         # BCPNN takes no init arguments
-        return {"G-value": self.G}
+        return {"normalize": self.normalize, "G-value": self.G}
 
     def set_params(self, **parameters):
         for parameter, value in parameters.items():
