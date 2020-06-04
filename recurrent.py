@@ -20,7 +20,7 @@ class BCPNN(FF_BCPNN):
 
     def predict(self, X, return_binary=False):
         input = X
-        prev = np.empty_like(X)
+        prev = np.zeros_like(X)
         iter = 0
         while  (iter < self.MAX_ITER and \
                 not np.allclose(input, prev, atol=self.TOL, rtol=0)):
