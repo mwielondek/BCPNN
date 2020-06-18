@@ -96,8 +96,10 @@ class BCPNN:
         # Or we can normalize the output over the hypercolumn (eq 2.15).
         expsup = np.exp(support * self.g)
         for sample_idx, sample in enumerate(expsup):
-            assert sample.sum() > 0
-            expsup[sample_idx] /= sample.sum()
+            # DEBUG: remove assert in final version
+            sample_sum = sample.sum()
+            assert sample_sum > 0
+            expsup[sample_idx] /= sample_sum
         return expsup
 
     @staticmethod
