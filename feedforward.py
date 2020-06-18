@@ -61,14 +61,12 @@ class BCPNN:
 
         support = np.empty((n_samples, self.n_classes_))
         for sample_idx, x in enumerate(X):
-            for cls_idx, j in enumerate(self.classes_):
+            beta = self.beta
 
-                beta = self.beta[j]
+            weights = (self.weights * x).sum(axis = 1)
 
-                weights = (self.weights[j, :] * x).sum()
-
-                h = beta + weights
-                support[sample_idx][cls_idx] = h
+            h = beta + weights
+            support[sample_idx] = h
 
         return support
 
