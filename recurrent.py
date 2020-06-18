@@ -1,7 +1,7 @@
 import numpy as np
-from feedforward import BCPNN as FF_BCPNN
+from feedforward import BCPNN as ffBCPNN
 
-class BCPNN(FF_BCPNN):
+class rBCPNN(ffBCPNN):
     """ A recurrent version of the Bayesian Confidence
     Propagation Neural Network (BCPNN).
 
