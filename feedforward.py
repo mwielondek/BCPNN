@@ -46,6 +46,14 @@ class BCPNN:
         # Necessary padding into X to arrive at the y values
         self.y_pad = self.n_features_
 
+        # Pre-calculate beta and weights
+        self.beta = [self._get_beta(self.y_pad + j) for j in self.classes_]
+
+        self.weights = np.zeros((self.n_classes_, self.n_features_))
+        for j in range(self.n_classes_):
+            for i in range(self.n_features_):
+                self.weights[j][i] = self._get_weights(j + self.y_pad, i)
+
     def predict_log_proba(self, X):
         """Classify and return the log probabilities of each sample
         belonging to respective class."""
@@ -54,13 +62,10 @@ class BCPNN:
         support = np.empty((n_samples, self.n_classes_))
         for sample_idx, x in enumerate(X):
             for cls_idx, j in enumerate(self.classes_):
-                j = self.y_pad + j
 
-                beta = self._get_beta(j)
+                beta = self.beta[j]
 
-                weights = 0
-                for i in range(n_features):
-                    weights += self._get_weights(j, i) * x[i]
+                weights = (self.weights[j, :] * x).sum()
 
                 h = beta + weights
                 support[sample_idx][cls_idx] = h
