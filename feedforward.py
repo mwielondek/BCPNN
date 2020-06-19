@@ -46,26 +46,20 @@ class BCPNN:
         # Necessary padding into X to arrive at the y values
         self.y_pad = self.n_features_
 
+        # Pre-calculate beta and weights
+        self.beta = [self._get_beta(self.y_pad + j) for j in self.classes_]
+
+        self.weights = np.zeros((self.n_classes_, self.n_features_))
+        for j in range(self.n_classes_):
+            for i in range(self.n_features_):
+                self.weights[j][i] = self._get_weights(j + self.y_pad, i)
+
     def predict_log_proba(self, X):
         """Classify and return the log probabilities of each sample
         belonging to respective class."""
-        n_samples, n_features = X.shape
-
-        support = np.empty((n_samples, self.n_classes_))
-        for sample_idx, x in enumerate(X):
-            for cls_idx, j in enumerate(self.classes_):
-                j = self.y_pad + j
-
-                beta = self._get_beta(j)
-
-                weights = 0
-                for i in range(n_features):
-                    weights += self._get_weights(j, i) * x[i]
-
-                h = beta + weights
-                support[sample_idx][cls_idx] = h
-
-        return support
+        beta = self.beta
+        weights = X.dot(self.weights.T)
+        return weights + beta
 
     def predict_proba(self, X):
         """Classify and return the probabilities of each sample
@@ -96,8 +90,10 @@ class BCPNN:
         # Or we can normalize the output over the hypercolumn (eq 2.15).
         expsup = np.exp(support * self.g)
         for sample_idx, sample in enumerate(expsup):
-            assert sample.sum() > 0
-            expsup[sample_idx] /= sample.sum()
+            # DEBUG: remove assert in final version
+            sample_sum = sample.sum()
+            assert sample_sum > 0
+            expsup[sample_idx] /= sample_sum
         return expsup
 
     @staticmethod
