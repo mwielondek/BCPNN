@@ -57,18 +57,9 @@ class BCPNN:
     def predict_log_proba(self, X):
         """Classify and return the log probabilities of each sample
         belonging to respective class."""
-        n_samples, n_features = X.shape
-
-        support = np.empty((n_samples, self.n_classes_))
-        for sample_idx, x in enumerate(X):
-            beta = self.beta
-
-            weights = (self.weights * x).sum(axis = 1)
-
-            h = beta + weights
-            support[sample_idx] = h
-
-        return support
+        beta = self.beta
+        weights = np.array([(self.weights * x).sum(axis = 1) for x in X])
+        return weights + beta
 
     def predict_proba(self, X):
         """Classify and return the probabilities of each sample
