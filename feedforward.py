@@ -85,6 +85,7 @@ class BCPNN:
         # alternative is to use a threshold in the transfer function
         # (Holst 1997, eq. 2.14)
         if not self.normalize:
+            support = support * self.g
             return np.exp(np.where(support > 0, 0, support))
 
         # Or we can normalize the output over the hypercolumn (eq 2.15).
