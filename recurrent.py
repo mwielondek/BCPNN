@@ -8,11 +8,12 @@ class rBCPNN(ffBCPNN):
     @author M. Wielondek
     """
 
-    def __init__(self, max_iter=1e3, tol=1e-4, prob_threshold=0.5, **kwargs):
+    def __init__(self, max_iter=1e3, tol=1e-4, prob_threshold=0.5, verbose=False, **kwargs):
         super().__init__(**kwargs)
         self.MAX_ITER = max_iter
         self.TOL = tol
         self.PROB_THRESHOLD = prob_threshold
+        self.VERBOSE = verbose
 
     def fit(self, X):
         n_samples, n_features = X.shape
@@ -29,6 +30,8 @@ class rBCPNN(ffBCPNN):
             iter += 1
         if return_binary:
             input = self._binarize(input, self.PROB_THRESHOLD)
+        if self.VERBOSE and iter >= self.MAX_ITER:
+            print("BCPNN: reached max iteration limit of ", self.MAX_ITER)
         return input
 
     def score(self, X, y, tol=0.5):
