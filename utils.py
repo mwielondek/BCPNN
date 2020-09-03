@@ -182,7 +182,7 @@ def draw_clustergram(gvals, clusters, targets=None, legend=True, cluster_padding
     for idx, _ in list(enumerate(yticks))[::2]:
         ax.axhspan(*yticks[idx:idx+2], alpha=0.1)
 
-    return ax
+    return fig, ax
 
 def transform_patterns(patterns):
     """One hot encode patterns, ie [[0,1,2]] -> [[1, 0, 0, 0, 1, 0, 0, 0, 1]]"""
