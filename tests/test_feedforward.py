@@ -1,7 +1,6 @@
+import numpy as np
 from feedforward import BCPNN
 from encoder import BinvecOneHotEncoder as encoder
-import numpy as np
-
 
 class TestUnitTests:
     def setup(self):

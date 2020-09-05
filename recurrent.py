@@ -1,5 +1,5 @@
 import numpy as np
-from feedforward import BCPNN as ffBCPNN
+from .feedforward import BCPNN as ffBCPNN
 
 class rBCPNN(ffBCPNN):
     """ A recurrent version of the Bayesian Confidence
