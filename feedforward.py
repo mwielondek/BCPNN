@@ -49,16 +49,16 @@ class BCPNN:
         # Pre-calculate beta and weights
         self.beta = [self._get_beta(self.y_pad + j) for j in self.classes_]
 
-        self.weights = np.zeros((self.n_classes_, self.n_features_))
-        for j in range(self.n_classes_):
-            for i in range(self.n_features_):
-                self.weights[j][i] = self._get_weights(j + self.y_pad, i)
+        self.weights = np.zeros((self.n_features_, self.n_classes_))
+        for i in range(self.n_features_):
+            for j in range(self.n_classes_):
+                self.weights[i][j] = self._get_weights(i, j + self.y_pad)
 
     def predict_log_proba(self, X):
         """Classify and return the log probabilities of each sample
         belonging to respective class."""
         beta = self.beta
-        weights = X.dot(self.weights.T)
+        weights = X.dot(self.weights)
         return weights + beta
 
     def predict_proba(self, X):
