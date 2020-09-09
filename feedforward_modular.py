@@ -77,6 +77,16 @@ class BCPNN:
         the mean accuracy."""
         return (self.predict(X) == y).sum() / len(y)
 
+    def _modular_idx_to_flat(self, i, iprim):
+        """ Translates modular index on the form i,i' to flat index"""
+        return self.module_sizes[:i].sum() + iprim
+
+    def _flat_to_modular_idx(self, flat_idx):
+        module_cumsum = np.hstack((0, np.cumsum(self.module_sizes)))
+        i = np.flatnonzero(module_cumsum > flat_idx)[0] - 1
+        iprim = flat_idx - module_cumsum[i]
+        return (i, iprim)
+
     def _transfer_fn(self, support):
         # Since the independence assumption often is only approximately
         # fulfilled, these equations give only an approximation of the
