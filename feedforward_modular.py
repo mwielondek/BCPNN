@@ -17,13 +17,15 @@ class BCPNN:
         # IN AN ATTRACTOR NETWORK WITH LOCAL COMPETITION", A. Lansner, 2006.
         self.g = g
 
-    def fit(self, X, Y):
+    def fit(self, X, Y, module_sizes):
         """Where X is an array of samples and Y is either:
 
         - an array of probabilities of respective sample belonging to each class
         OR
         - an array of class indices to which each samples belongs to (assumes
          100% probability)
+
+        and module_sizes is an array designating the size of each module (= hypercolumn)
         """
 
         assert X.shape[0] == Y.shape[0]
@@ -38,6 +40,9 @@ class BCPNN:
             self.Y_ = Y
             self.classes_ = np.arange(Y.shape[1])
         self.n_classes_ = self.classes_.shape[0]
+
+        assert module_sizes.sum() == self.n_features_ + self.n_classes_
+        self.module_sizes = module_sizes
 
         # Extending X with y values allows us to work with
         # only one array throughout the code, enabling us to
@@ -58,8 +63,18 @@ class BCPNN:
         """Classify and return the log probabilities of each sample
         belonging to respective class."""
         beta = self.beta
-        weights = X.dot(self.weights)
-        return weights + beta
+        s = np.zeros((self.n_samples_, self.n_classes_))
+        n_modules_j = np.flatnonzero(np.cumsum(self.module_sizes[::-1]) == self.n_classes_)[0] + 1
+        n_modules_i = self.module_sizes.size - n_modules_j
+        for sample in range(X.shape[0]):
+            for sjj in range(self.n_classes_):
+                theta = np.zeros(n_modules_i)
+                for i in range(theta.shape[0]):
+                    theta[i] = self.weights[i:i+self.module_sizes[i], sjj].dot(X[sample, i:i+self.module_sizes[i]].T)
+                    # assert theta[i] != 0
+                sigma_log = np.log( theta ).sum()
+                s[sample, sjj] = beta[sjj] + sigma_log
+        return s
 
     def predict_proba(self, X):
         """Classify and return the probabilities of each sample
@@ -97,13 +112,14 @@ class BCPNN:
         if not self.normalize:
             return np.exp(np.where(support > 0, 0, support))
 
-        # Or we can normalize the output over the hypercolumn (eq 2.15).
         expsup = np.exp(support * self.g)
+        expsup_copy = expsup.copy()
         for sample_idx, sample in enumerate(expsup):
-            # DEBUG: remove assert in final version
-            sample_sum = sample.sum()
-            assert sample_sum > 0
-            expsup[sample_idx] /= sample_sum
+            for sjj in range(self.n_classes_):
+                i, _ = self._flat_to_modular_idx(sjj + self.y_pad) # add ypad?
+                ii = self._modular_idx_to_flat(i, 0) - self.y_pad   # idx of start of module i
+                # when I get to second iter of sjj, expsup is already altered
+                expsup[sample_idx, sjj] /= expsup_copy[sample_idx, ii:ii+self.module_sizes[i]].sum()
         return expsup
 
     @staticmethod
@@ -150,7 +166,7 @@ class BCPNN:
         # divided by number of samples
         return (self.X_[:, i] * self.X_[:, j]).sum() / self.n_samples_
 
-    def _get_weights(self, i, j):
+    def _get_weights_log(self, i, j):
         # P(x_i, x_j) / ( P(x_i) x P(x_j) )
 
         ci, cj = self._get_prob(i), self._get_prob(j)
@@ -161,6 +177,18 @@ class BCPNN:
         if cij == 0:
             return np.log(1 / self.n_samples_)
         return np.log( cij / (ci * cj) )
+
+    def _get_weights(self, i, j):
+        # P(x_i, x_j) / ( P(x_i) x P(x_j) )
+
+        ci, cj = self._get_prob(i), self._get_prob(j)
+        cij = self._get_joint_prob(i, j)
+        if ci == 0 or cj == 0:
+            return 1
+        # we deal with log(0) case, as per Holst 1997 (eq. 2.36)
+        if cij == 0:
+            return 1 / self.n_samples_
+        return cij / (ci * cj)
 
     """
      For compatibility with sklearn, below are
