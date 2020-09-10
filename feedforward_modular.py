@@ -112,6 +112,9 @@ class BCPNN:
         if not self.normalize:
             return np.exp(np.where(support > 0, 0, support))
 
+        # check for -inf, which results from special case of all features off [0, .., 0]
+        support = np.where(support == -np.inf, 0, support)
+
         expsup = np.exp(support * self.g)
         expsup_copy = expsup.copy()
         for sample_idx, sample in enumerate(expsup):
