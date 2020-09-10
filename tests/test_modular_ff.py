@@ -101,6 +101,15 @@ def testModuleSize3_3_proba():
     module_sizes  = np.array([3, 3])
     predict_runner(train_pattern, targets, predictions, module_sizes, mode='proba', normalize=True)
 
+def testModuleSize3_3_custom_log():
+    train_pattern = np.array([[0, 1, 0], [1, 0, 0]])
+    targets       = np.array([[0, 1, 0], [1, 0, 0]])
+    test_pattern  = np.array([[1, 1, 0], [1, 1, 1], [0, 0, 1], [1, 0, 1]])
+    predictions   = np.array([[np.log(1/4), 0, np.log(1/4)], [0, np.log(1/4), np.log(1/4)]])
+    module_sizes  = np.array([3, 3])
+    predict_runner(train_pattern, targets, predictions, module_sizes, test_pattern=test_pattern,
+     mode='proba', normalize=True)
+
 def testModuleSize2_2_2_log():
     train_pattern = np.array([[0, 1, 0, 1], [1, 0, 1, 0]])
     targets       = np.array([[0, 1], [1, 0]])

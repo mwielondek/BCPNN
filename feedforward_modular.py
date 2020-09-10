@@ -31,7 +31,7 @@ class BCPNN:
         assert X.shape[0] == Y.shape[0]
 
         self.X_ = X
-        self.n_samples_, self.n_features_ = X.shape
+        self.n_training_samples, self.n_features_ = X.shape
 
         if Y.ndim == 1:
             self.classes_ = self._unique_labels(Y)
@@ -63,7 +63,8 @@ class BCPNN:
         """Classify and return the log probabilities of each sample
         belonging to respective class."""
         beta = self.beta
-        s = np.zeros((self.n_samples_, self.n_classes_))
+        n_samples = X.shape[0]
+        s = np.zeros((n_samples, self.n_classes_))
         n_modules_j = np.flatnonzero(np.cumsum(self.module_sizes[::-1]) == self.n_classes_)[0] + 1
         n_modules_i = self.module_sizes.size - n_modules_j
         for sample in range(X.shape[0]):
@@ -152,20 +153,20 @@ class BCPNN:
         c = self._get_prob(i)
         # we deal with log(0) case, as per Holst 1997 (eq. 2.37)
         if c == 0:
-            return np.log(1 / (self.n_samples_ ** 2))
+            return np.log(1 / (self.n_training_samples ** 2))
         return np.log(c)
 
     def _get_prob(self, i):
         # P(x_i)
         # Check how many times x_i occured,
         # divided by the number of samples
-        return self.X_[:, i].sum() / self.n_samples_
+        return self.X_[:, i].sum() / self.n_training_samples
 
     def _get_joint_prob(self, i, j):
         # P(x_i, x_j)
         # Check how many times x_i occured together with x_j,
         # divided by number of samples
-        return (self.X_[:, i] * self.X_[:, j]).sum() / self.n_samples_
+        return (self.X_[:, i] * self.X_[:, j]).sum() / self.n_training_samples
 
     def _get_weights_log(self, i, j):
         # P(x_i, x_j) / ( P(x_i) x P(x_j) )
@@ -176,7 +177,7 @@ class BCPNN:
             return 0
         # we deal with log(0) case, as per Holst 1997 (eq. 2.36)
         if cij == 0:
-            return np.log(1 / self.n_samples_)
+            return np.log(1 / self.n_training_samples)
         return np.log( cij / (ci * cj) )
 
     def _get_weights(self, i, j):
@@ -188,7 +189,7 @@ class BCPNN:
             return 1
         # we deal with log(0) case, as per Holst 1997 (eq. 2.36)
         if cij == 0:
-            return 1 / self.n_samples_
+            return 1 / self.n_training_samples
         return cij / (ci * cj)
 
     """
