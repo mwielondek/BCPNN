@@ -119,7 +119,8 @@ def testModuleSize2_2_2_custom_test_log():
     train_pattern = np.array([[0, 1, 0, 1], [1, 0, 1, 0]])
     test_pattern  = np.array([[1, 1, 1, 1], [0, 0, 0, 0]])
     targets       = np.array([[0, 1], [1, 0]])
-    predictions   = np.array([[np.log(25/8), np.log(25/8)], [-np.inf, -np.inf]])
+    # in the case of no active input features, we want to return the class prior
+    predictions   = np.array([[np.log(25/8), np.log(25/8)], [np.log(1/2), np.log(1/2)]])
     module_sizes  = np.array([2, 2, 2])
     predict_runner(train_pattern, targets, predictions, module_sizes, test_pattern=test_pattern,
                     mode='log', normalize=True)

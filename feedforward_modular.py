@@ -71,8 +71,9 @@ class BCPNN:
                 theta = np.zeros(n_modules_i)
                 for i in range(theta.shape[0]):
                     theta[i] = self.weights[i:i+self.module_sizes[i], sjj].dot(X[sample, i:i+self.module_sizes[i]].T)
-                    # assert theta[i] != 0
-                sigma_log = np.log( theta ).sum()
+                # exclude all-off modules (log of 1 will give 0 which will remove it from the sum in sigma_log)
+                theta = np.where(theta == 0, 1, theta)
+                sigma_log = np.log(theta).sum()
                 s[sample, sjj] = beta[sjj] + sigma_log
         return s
 
@@ -111,9 +112,6 @@ class BCPNN:
         # (Holst 1997, eq. 2.14)
         if not self.normalize:
             return np.exp(np.where(support > 0, 0, support))
-
-        # check for -inf, which results from special case of all features off [0, .., 0]
-        support = np.where(support == -np.inf, 0, support)
 
         expsup = np.exp(support * self.g)
         expsup_copy = expsup.copy()
