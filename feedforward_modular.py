@@ -71,7 +71,8 @@ class BCPNN:
             for sjj in range(self.n_classes_):
                 theta = np.zeros(n_modules_i)
                 for i in range(theta.shape[0]):
-                    theta[i] = self.weights[i:i+self.module_sizes[i], sjj].dot(X[sample, i:i+self.module_sizes[i]].T)
+                    ii = self._modular_idx_to_flat(i, 0)   # idx of start of module i
+                    theta[i] = self.weights[ii:ii+self.module_sizes[i], sjj].dot(X[sample, ii:ii+self.module_sizes[i]].T)
                 # exclude all-off modules (log of 1 will give 0 which will remove it from the sum in sigma_log)
                 theta = np.where(theta == 0, 1, theta)
                 sigma_log = np.log(theta).sum()

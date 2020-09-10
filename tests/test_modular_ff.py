@@ -1,3 +1,4 @@
+import pytest
 from feedforward_modular import BCPNN
 import numpy as np
 
@@ -101,15 +102,6 @@ def testModuleSize3_3_proba():
     module_sizes  = np.array([3, 3])
     predict_runner(train_pattern, targets, predictions, module_sizes, mode='proba', normalize=True)
 
-def testModuleSize3_3_custom_log():
-    train_pattern = np.array([[0, 1, 0], [1, 0, 0]])
-    targets       = np.array([[0, 1, 0], [1, 0, 0]])
-    test_pattern  = np.array([[1, 1, 0], [1, 1, 1], [0, 0, 1], [1, 0, 1]])
-    predictions   = np.array([[np.log(1/4), 0, np.log(1/4)], [0, np.log(1/4), np.log(1/4)]])
-    module_sizes  = np.array([3, 3])
-    predict_runner(train_pattern, targets, predictions, module_sizes, test_pattern=test_pattern,
-     mode='proba', normalize=True)
-
 def testModuleSize2_2_2_log():
     train_pattern = np.array([[0, 1, 0, 1], [1, 0, 1, 0]])
     targets       = np.array([[0, 1], [1, 0]])
@@ -123,6 +115,13 @@ def testModuleSize2_2_2_proba():
     predictions   = np.array([[1/17, 16/17], [16/17, 1/17]])
     module_sizes  = np.array([2, 2, 2])
     predict_runner(train_pattern, targets, predictions, module_sizes, mode='proba', normalize=True)
+
+def testModuleSize2_3_2_log():
+    train_pattern = np.array([[0, 1, 1, 0, 0], [1, 0, 0, 1, 0]])
+    targets       = np.array([[0, 1], [1, 0]])
+    predictions   = np.array([[np.log(1/8), np.log(2)], [np.log(2), np.log(1/8)]])
+    module_sizes  = np.array([2, 3, 2])
+    predict_runner(train_pattern, targets, predictions, module_sizes, mode='log', normalize=True)
 
 def testModuleSize2_2_2_custom_test_log():
     train_pattern = np.array([[0, 1, 0, 1], [1, 0, 1, 0]])
