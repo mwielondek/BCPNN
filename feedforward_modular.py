@@ -179,29 +179,16 @@ class BCPNN:
         # divided by number of samples
         return (self.X_[:, i] * self.X_[:, j]).sum() / self.n_training_samples
 
-    def _get_weights_log(self, i, j):
-        # P(x_i, x_j) / ( P(x_i) x P(x_j) )
-
-        ci, cj = self._get_prob(i), self._get_prob(j)
-        cij = self._get_joint_prob(i, j)
-        if ci == 0 or cj == 0:
-            return 0
-        # we deal with log(0) case, as per Holst 1997 (eq. 2.36)
-        if cij == 0:
-            return np.log(1 / self.n_training_samples)
-        return np.log( cij / (ci * cj) )
-
     def _get_weights(self, i, j):
         # P(x_i, x_j) / ( P(x_i) x P(x_j) )
-
-        ci, cj = self._get_prob(i), self._get_prob(j)
-        cij = self._get_joint_prob(i, j)
-        if ci == 0 or cj == 0:
+        pi, pj = self._get_prob(i), self._get_prob(j)
+        pij = self._get_joint_prob(i, j)
+        if pi == 0 or pj == 0:
             return 1
         # we deal with log(0) case, as per Holst 1997 (eq. 2.36)
-        if cij == 0:
+        if pij == 0:
             return 1 / self.n_training_samples
-        return cij / (ci * cj)
+        return pij / (pi * pj)
 
     """
      For compatibility with sklearn, below are
