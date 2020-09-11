@@ -3,7 +3,7 @@ import numpy as np
 
 from feedforward_modular import BCPNN
 
-
+## TEST UTILS
 def clf_factory(test_pattern, targets, module_sizes, normalize=True):
     clf = BCPNN(normalize=normalize)
     clf.fit(test_pattern, targets, module_sizes)
@@ -95,86 +95,89 @@ class TestUnitTests:
             with pytest.raises(BCPNN.NormalizationError):
                 clf._assert_module_normalization(X)
 
+class TestModule:
 
-def testModuleSize2_2_log():
-    train_pattern = np.array([[0, 1], [1, 0]])
-    targets       = np.array([[0, 1], [1, 0]])
-    predictions   = np.array([[np.log(1/4), 0], [0, np.log(1/4)]])
-    module_sizes  = np.array([2, 2])
-    predict_runner(train_pattern, targets, predictions, module_sizes, mode='log')
+    class TestBinary:
 
-def testModuleSize2_2_proba_no_norm():
-    train_pattern = np.array([[0, 1], [1, 0]])
-    targets       = np.array([[0, 1], [1, 0]])
-    predictions   = np.array([[0.25, 1], [1, 0.25]])
-    module_sizes  = np.array([2, 2])
-    predict_runner(train_pattern, targets, predictions, module_sizes, mode='proba', normalize=False)
+        def testModuleSize2_2_log(self):
+            train_pattern = np.array([[0, 1], [1, 0]])
+            targets       = np.array([[0, 1], [1, 0]])
+            predictions   = np.array([[np.log(1/4), 0], [0, np.log(1/4)]])
+            module_sizes  = np.array([2, 2])
+            predict_runner(train_pattern, targets, predictions, module_sizes, mode='log')
 
-def testModuleSize2_2_proba():
-    train_pattern = np.array([[0, 1], [1, 0]])
-    targets       = np.array([[0, 1], [1, 0]])
-    predictions   = np.array([[0.2, 0.8], [0.8, 0.2]])
-    module_sizes  = np.array([2, 2])
-    predict_runner(train_pattern, targets, predictions, module_sizes, mode='proba', normalize=True)
+        def testModuleSize2_2_proba_no_norm(self):
+            train_pattern = np.array([[0, 1], [1, 0]])
+            targets       = np.array([[0, 1], [1, 0]])
+            predictions   = np.array([[0.25, 1], [1, 0.25]])
+            module_sizes  = np.array([2, 2])
+            predict_runner(train_pattern, targets, predictions, module_sizes, mode='proba', normalize=False)
 
-def testModuleSize3_2_proba():
-    train_pattern = np.array([[0, 1, 0], [1, 0, 0]])
-    targets       = np.array([[0, 1], [1, 0]])
-    predictions   = np.array([[0.2, 0.8], [0.8, 0.2]])
-    module_sizes  = np.array([3, 2])
-    predict_runner(train_pattern, targets, predictions, module_sizes, mode='proba', normalize=True)
+        def testModuleSize2_2_proba(self):
+            train_pattern = np.array([[0, 1], [1, 0]])
+            targets       = np.array([[0, 1], [1, 0]])
+            predictions   = np.array([[0.2, 0.8], [0.8, 0.2]])
+            module_sizes  = np.array([2, 2])
+            predict_runner(train_pattern, targets, predictions, module_sizes, mode='proba', normalize=True)
 
-def testModuleSize3_3_log():
-    train_pattern = np.array([[0, 1, 0], [1, 0, 0]])
-    targets       = np.array([[0, 1, 0], [1, 0, 0]])
-    predictions   = np.array([[np.log(1/4), 0, np.log(1/4)], [0, np.log(1/4), np.log(1/4)]])
-    module_sizes  = np.array([3, 3])
-    predict_runner(train_pattern, targets, predictions, module_sizes, mode='log', normalize=True)
+        def testModuleSize3_2_proba(self):
+            train_pattern = np.array([[0, 1, 0], [1, 0, 0]])
+            targets       = np.array([[0, 1], [1, 0]])
+            predictions   = np.array([[0.2, 0.8], [0.8, 0.2]])
+            module_sizes  = np.array([3, 2])
+            predict_runner(train_pattern, targets, predictions, module_sizes, mode='proba', normalize=True)
 
-def testModuleSize3_3_proba():
-    train_pattern = np.array([[0, 1, 0], [1, 0, 0]])
-    targets       = np.array([[0, 1, 0], [1, 0, 0]])
-    predictions   = np.array([[1/6, 2/3, 1/6], [2/3, 1/6, 1/6]])
-    module_sizes  = np.array([3, 3])
-    predict_runner(train_pattern, targets, predictions, module_sizes, mode='proba', normalize=True)
+        def testModuleSize3_3_log(self):
+            train_pattern = np.array([[0, 1, 0], [1, 0, 0]])
+            targets       = np.array([[0, 1, 0], [1, 0, 0]])
+            predictions   = np.array([[np.log(1/4), 0, np.log(1/4)], [0, np.log(1/4), np.log(1/4)]])
+            module_sizes  = np.array([3, 3])
+            predict_runner(train_pattern, targets, predictions, module_sizes, mode='log', normalize=True)
 
-def testModuleSize2_2_2_log():
-    train_pattern = np.array([[0, 1, 0, 1], [1, 0, 1, 0]])
-    targets       = np.array([[0, 1], [1, 0]])
-    predictions   = np.array([[np.log(1/8), np.log(2)], [np.log(2), np.log(1/8)]])
-    module_sizes  = np.array([2, 2, 2])
-    predict_runner(train_pattern, targets, predictions, module_sizes, mode='log', normalize=True)
+        def testModuleSize3_3_proba(self):
+            train_pattern = np.array([[0, 1, 0], [1, 0, 0]])
+            targets       = np.array([[0, 1, 0], [1, 0, 0]])
+            predictions   = np.array([[1/6, 2/3, 1/6], [2/3, 1/6, 1/6]])
+            module_sizes  = np.array([3, 3])
+            predict_runner(train_pattern, targets, predictions, module_sizes, mode='proba', normalize=True)
 
-def testModuleSize2_2_2_proba():
-    train_pattern = np.array([[0, 1, 0, 1], [1, 0, 1, 0]])
-    targets       = np.array([[0, 1], [1, 0]])
-    predictions   = np.array([[1/17, 16/17], [16/17, 1/17]])
-    module_sizes  = np.array([2, 2, 2])
-    predict_runner(train_pattern, targets, predictions, module_sizes, mode='proba', normalize=True)
+        def testModuleSize2_2_2_log(self):
+            train_pattern = np.array([[0, 1, 0, 1], [1, 0, 1, 0]])
+            targets       = np.array([[0, 1], [1, 0]])
+            predictions   = np.array([[np.log(1/8), np.log(2)], [np.log(2), np.log(1/8)]])
+            module_sizes  = np.array([2, 2, 2])
+            predict_runner(train_pattern, targets, predictions, module_sizes, mode='log', normalize=True)
 
-def testModuleSize2_3_2_log():
-    train_pattern = np.array([[0, 1, 1, 0, 0], [1, 0, 0, 1, 0]])
-    targets       = np.array([[0, 1], [1, 0]])
-    predictions   = np.array([[np.log(1/8), np.log(2)], [np.log(2), np.log(1/8)]])
-    module_sizes  = np.array([2, 3, 2])
-    predict_runner(train_pattern, targets, predictions, module_sizes, mode='log', normalize=True)
+        def testModuleSize2_2_2_proba(self):
+            train_pattern = np.array([[0, 1, 0, 1], [1, 0, 1, 0]])
+            targets       = np.array([[0, 1], [1, 0]])
+            predictions   = np.array([[1/17, 16/17], [16/17, 1/17]])
+            module_sizes  = np.array([2, 2, 2])
+            predict_runner(train_pattern, targets, predictions, module_sizes, mode='proba', normalize=True)
 
-def testModuleNormalizationAssertion1_train():
-    train_pattern = np.array([[1, 1]])
-    targets       = np.array([[1, 0]])
-    test_pattern  = np.array([[0, 0]])
-    predictions   = np.array([[1, 0]])
-    module_sizes  = np.array([2, 2])
-    with pytest.raises(BCPNN.NormalizationError):
-        predict_runner(train_pattern, targets, predictions, module_sizes, test_pattern=test_pattern,
-         mode='proba', normalize=True)
+        def testModuleSize2_3_2_log(self):
+            train_pattern = np.array([[0, 1, 1, 0, 0], [1, 0, 0, 1, 0]])
+            targets       = np.array([[0, 1], [1, 0]])
+            predictions   = np.array([[np.log(1/8), np.log(2)], [np.log(2), np.log(1/8)]])
+            module_sizes  = np.array([2, 3, 2])
+            predict_runner(train_pattern, targets, predictions, module_sizes, mode='log', normalize=True)
 
-def testModuleNormalizationAssertion1_test():
-    train_pattern = np.array([[1, 0]])
-    targets       = np.array([[1, 0]])
-    test_pattern  = np.array([[1, 1]])
-    predictions   = np.array([[1, 0]])
-    module_sizes  = np.array([2, 2])
-    with pytest.raises(BCPNN.NormalizationError):
-        predict_runner(train_pattern, targets, predictions, module_sizes, test_pattern=test_pattern,
-         mode='proba', normalize=True)
+        def testModuleNormalizationAssertion1_train(self):
+            train_pattern = np.array([[1, 1]])
+            targets       = np.array([[1, 0]])
+            test_pattern  = np.array([[0, 0]])
+            predictions   = np.array([[1, 0]])
+            module_sizes  = np.array([2, 2])
+            with pytest.raises(BCPNN.NormalizationError):
+                predict_runner(train_pattern, targets, predictions, module_sizes, test_pattern=test_pattern,
+                 mode='proba', normalize=True)
+
+        def testModuleNormalizationAssertion1_test(self):
+            train_pattern = np.array([[1, 0]])
+            targets       = np.array([[1, 0]])
+            test_pattern  = np.array([[1, 1]])
+            predictions   = np.array([[1, 0]])
+            module_sizes  = np.array([2, 2])
+            with pytest.raises(BCPNN.NormalizationError):
+                predict_runner(train_pattern, targets, predictions, module_sizes, test_pattern=test_pattern,
+                 mode='proba', normalize=True)
