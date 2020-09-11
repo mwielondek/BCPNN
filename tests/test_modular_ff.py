@@ -118,49 +118,49 @@ class TestModule:
             targets       = np.array([[0, 1], [1, 0]])
             predictions   = np.array([[0.2, 0.8], [0.8, 0.2]])
             module_sizes  = np.array([2, 2])
-            predict_runner(train_pattern, targets, predictions, module_sizes, mode='proba', normalize=True)
+            predict_runner(train_pattern, targets, predictions, module_sizes, mode='proba')
 
         def testModuleSize3_2_proba(self):
             train_pattern = np.array([[0, 1, 0], [1, 0, 0]])
             targets       = np.array([[0, 1], [1, 0]])
             predictions   = np.array([[0.2, 0.8], [0.8, 0.2]])
             module_sizes  = np.array([3, 2])
-            predict_runner(train_pattern, targets, predictions, module_sizes, mode='proba', normalize=True)
+            predict_runner(train_pattern, targets, predictions, module_sizes, mode='proba')
 
         def testModuleSize3_3_log(self):
             train_pattern = np.array([[0, 1, 0], [1, 0, 0]])
             targets       = np.array([[0, 1, 0], [1, 0, 0]])
             predictions   = np.array([[np.log(1/4), 0, np.log(1/4)], [0, np.log(1/4), np.log(1/4)]])
             module_sizes  = np.array([3, 3])
-            predict_runner(train_pattern, targets, predictions, module_sizes, mode='log', normalize=True)
+            predict_runner(train_pattern, targets, predictions, module_sizes, mode='log')
 
         def testModuleSize3_3_proba(self):
             train_pattern = np.array([[0, 1, 0], [1, 0, 0]])
             targets       = np.array([[0, 1, 0], [1, 0, 0]])
             predictions   = np.array([[1/6, 2/3, 1/6], [2/3, 1/6, 1/6]])
             module_sizes  = np.array([3, 3])
-            predict_runner(train_pattern, targets, predictions, module_sizes, mode='proba', normalize=True)
+            predict_runner(train_pattern, targets, predictions, module_sizes, mode='proba')
 
         def testModuleSize2_2_2_log(self):
             train_pattern = np.array([[0, 1, 0, 1], [1, 0, 1, 0]])
             targets       = np.array([[0, 1], [1, 0]])
             predictions   = np.array([[np.log(1/8), np.log(2)], [np.log(2), np.log(1/8)]])
             module_sizes  = np.array([2, 2, 2])
-            predict_runner(train_pattern, targets, predictions, module_sizes, mode='log', normalize=True)
+            predict_runner(train_pattern, targets, predictions, module_sizes, mode='log')
 
         def testModuleSize2_2_2_proba(self):
             train_pattern = np.array([[0, 1, 0, 1], [1, 0, 1, 0]])
             targets       = np.array([[0, 1], [1, 0]])
             predictions   = np.array([[1/17, 16/17], [16/17, 1/17]])
             module_sizes  = np.array([2, 2, 2])
-            predict_runner(train_pattern, targets, predictions, module_sizes, mode='proba', normalize=True)
+            predict_runner(train_pattern, targets, predictions, module_sizes, mode='proba')
 
         def testModuleSize2_3_2_log(self):
             train_pattern = np.array([[0, 1, 1, 0, 0], [1, 0, 0, 1, 0]])
             targets       = np.array([[0, 1], [1, 0]])
             predictions   = np.array([[np.log(1/8), np.log(2)], [np.log(2), np.log(1/8)]])
             module_sizes  = np.array([2, 3, 2])
-            predict_runner(train_pattern, targets, predictions, module_sizes, mode='log', normalize=True)
+            predict_runner(train_pattern, targets, predictions, module_sizes, mode='log')
 
         def testModuleNormalizationAssertion1_train(self):
             train_pattern = np.array([[1, 1]])
@@ -170,7 +170,7 @@ class TestModule:
             module_sizes  = np.array([2, 2])
             with pytest.raises(BCPNN.NormalizationError):
                 predict_runner(train_pattern, targets, predictions, module_sizes, test_pattern=test_pattern,
-                 mode='proba', normalize=True)
+                 mode='proba')
 
         def testModuleNormalizationAssertion1_test(self):
             train_pattern = np.array([[1, 0]])
@@ -180,7 +180,7 @@ class TestModule:
             module_sizes  = np.array([2, 2])
             with pytest.raises(BCPNN.NormalizationError):
                 predict_runner(train_pattern, targets, predictions, module_sizes, test_pattern=test_pattern,
-                 mode='proba', normalize=True)
+                 mode='proba')
 
     class TestFractional:
 
@@ -197,3 +197,29 @@ class TestModule:
             predictions   = np.array([[np.log(155/480), np.log(288/240)], [np.log(6/5), np.log(1/10)]])
             module_sizes  = np.array([2, 3, 2])
             predict_runner(train_pattern, targets, predictions, module_sizes, mode='log')
+
+    class TestDifferentTestPattern:
+
+        def testModuleSize2_2_log(self):
+            train_pattern = np.array([[1, 0], [0, 1]])
+            targets       = np.array([[1, 0], [0, 1]])
+            test_pattern  = np.array([[1/2, 1/2], [2/3, 1/3]])
+            predictions   = np.array([[np.log(5/8), np.log(5/8)], [np.log(3/4), np.log(1/2)]])
+            module_sizes  = np.array([2, 2])
+            predict_runner(train_pattern, targets, predictions, module_sizes, test_pattern=test_pattern, mode='log')
+
+        def testModuleSize2_2_single_log(self):
+            train_pattern = np.array([[1, 0]])
+            targets       = np.array([[1, 0]])
+            test_pattern  = np.array([[1, 0], [2/3, 1/3]])
+            predictions   = np.array([[0, 0], [0, 0]])
+            module_sizes  = np.array([2, 2])
+            predict_runner(train_pattern, targets, predictions, module_sizes, test_pattern=test_pattern, mode='log')
+
+        def testModuleSize3_2_log(self):
+            train_pattern = np.array([[1, 0, 0], [0, 1, 0]])
+            targets       = np.array([[1, 0], [0, 1]])
+            test_pattern  = np.array([[0, 0, 1], [0, 1/2, 1/2]])
+            predictions   = np.array([[np.log(1/2), np.log(1/2)], [np.log(3/8), np.log(3/4)]])
+            module_sizes  = np.array([3, 2])
+            predict_runner(train_pattern, targets, predictions, module_sizes, test_pattern=test_pattern, mode='log')
