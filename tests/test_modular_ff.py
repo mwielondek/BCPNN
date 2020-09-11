@@ -154,25 +154,6 @@ def testModuleSize2_3_2_log():
     module_sizes  = np.array([2, 3, 2])
     predict_runner(train_pattern, targets, predictions, module_sizes, mode='log', normalize=True)
 
-def testModuleSize2_2_2_custom_test_log():
-    train_pattern = np.array([[0, 1, 0, 1], [1, 0, 1, 0]])
-    test_pattern  = np.array([[1, 1, 1, 1], [0, 0, 0, 0]])
-    targets       = np.array([[0, 1], [1, 0]])
-    # in the case of no active input features, we want to return the class prior
-    predictions   = np.array([[np.log(25/8), np.log(25/8)], [np.log(1/2), np.log(1/2)]])
-    module_sizes  = np.array([2, 2, 2])
-    predict_runner(train_pattern, targets, predictions, module_sizes, test_pattern=test_pattern,
-                    mode='log', normalize=True)
-
-def testModuleSize2_2_2_custom_test_proba():
-    train_pattern = np.array([[0, 1, 0, 1], [1, 0, 1, 0]])
-    test_pattern  = np.array([[1, 1, 1, 1], [0, 0, 0, 0]])
-    targets       = np.array([[0, 1], [1, 0]])
-    predictions   = np.array([[1/2, 1/2], [1/2, 1/2]])
-    module_sizes  = np.array([2, 2, 2])
-    predict_runner(train_pattern, targets, predictions, module_sizes, test_pattern=test_pattern,
-                    mode='proba', normalize=True)
-
 def testModuleNormalizationAssertion1_train():
     train_pattern = np.array([[1, 1]])
     targets       = np.array([[1, 0]])
