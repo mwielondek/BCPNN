@@ -43,6 +43,7 @@ class BCPNN:
 
         assert module_sizes.sum() == self.n_features_ + self.n_classes_
         self.module_sizes = module_sizes
+        assert self._correct_module_normalization(X), "values within each module should sum up to 1"
 
         # Extending X with y values allows us to work with
         # only one array throughout the code, enabling us to
@@ -62,6 +63,7 @@ class BCPNN:
     def predict_log_proba(self, X):
         """Classify and return the log probabilities of each sample
         belonging to respective class."""
+        assert self._correct_module_normalization(X), "values within each module should sum up to 1"
         beta = self.beta
         n_samples = X.shape[0]
         s = np.zeros((n_samples, self.n_classes_))
@@ -94,6 +96,12 @@ class BCPNN:
         """Classify and compare the predicted labels with y, returning
         the mean accuracy."""
         return (self.predict(X) == y).sum() / len(y)
+
+    def _correct_module_normalization(self, X):
+        """ Checks that the values in each module sum up to 1"""
+        modules = np.split(X, np.cumsum(self.module_sizes[:-1]), axis=1)
+        equals_one = np.array([module.sum(axis=1) for module in modules if module.size > 0]) == 1
+        return equals_one.all()
 
     def _modular_idx_to_flat(self, i, iprim):
         """ Translates modular index on the form i,i' to flat index"""

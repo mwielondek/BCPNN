@@ -28,9 +28,11 @@ def predict_runner(train_pattern, targets, predictions, module_sizes,
 
 class TestUnitTests:
 
-    def testIndexTransform(self):
-        clf = BCPNN()
+    @pytest.fixture(scope="function")
+    def clf(self):
+        return BCPNN()
 
+    def testIndexTransform(self, clf):
         clf.module_sizes = np.array([1])
         modular = (0, 0)
         flat = 0
@@ -58,6 +60,35 @@ class TestUnitTests:
         flat = 5
         assert clf._modular_idx_to_flat(*modular) == flat
         assert clf._flat_to_modular_idx(flat) == modular
+
+    class TestNormalization:
+
+        def testCheckNormalization1(self, clf):
+            X = np.array([[0, 1]])
+            clf.module_sizes = np.array([2, 2])
+            assert clf._correct_module_normalization(X)
+
+            X = np.array([[1, 1]])
+            clf.module_sizes = np.array([2, 2])
+            assert not clf._correct_module_normalization(X)
+
+        def testCheckNormalization2(self, clf):
+            X = np.array([[0, 1], [1/2, 1/2]])
+            clf.module_sizes = np.array([2, 2])
+            assert clf._correct_module_normalization(X)
+
+            X = np.array([[1, 1], [1/2, 1/2]])
+            clf.module_sizes = np.array([2, 2])
+            assert not clf._correct_module_normalization(X)
+
+        def testCheckNormalization3(self, clf):
+            X = np.array([[0, 1/2, 1/2, 1/2, 1/2]])
+            clf.module_sizes = np.array([3, 2, 2])
+            assert clf._correct_module_normalization(X)
+
+            X = np.array([[1, 1, 1, 1, 1]])
+            clf.module_sizes = np.array([3, 2, 2])
+            assert not clf._correct_module_normalization(X)
 
 
 def testModuleSize2_2_log():
@@ -141,3 +172,23 @@ def testModuleSize2_2_2_custom_test_proba():
     module_sizes  = np.array([2, 2, 2])
     predict_runner(train_pattern, targets, predictions, module_sizes, test_pattern=test_pattern,
                     mode='proba', normalize=True)
+
+def testModuleNormalizationAssertion1_train():
+    train_pattern = np.array([[1, 1]])
+    targets       = np.array([[1, 0]])
+    test_pattern  = np.array([[0, 0]])
+    predictions   = np.array([[1, 0]])
+    module_sizes  = np.array([2, 2])
+    with pytest.raises(AssertionError, match="sum up to 1"):
+        predict_runner(train_pattern, targets, predictions, module_sizes, test_pattern=test_pattern,
+         mode='proba', normalize=True)
+
+def testModuleNormalizationAssertion1_test():
+    train_pattern = np.array([[1, 0]])
+    targets       = np.array([[1, 0]])
+    test_pattern  = np.array([[1, 1]])
+    predictions   = np.array([[1, 0]])
+    module_sizes  = np.array([2, 2])
+    with pytest.raises(AssertionError, match="sum up to 1"):
+        predict_runner(train_pattern, targets, predictions, module_sizes, test_pattern=test_pattern,
+         mode='proba', normalize=True)
