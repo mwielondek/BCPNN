@@ -181,3 +181,19 @@ class TestModule:
             with pytest.raises(BCPNN.NormalizationError):
                 predict_runner(train_pattern, targets, predictions, module_sizes, test_pattern=test_pattern,
                  mode='proba', normalize=True)
+
+    class TestFractional:
+
+        def testModuleSize2_2_log(self):
+            train_pattern = np.array([[1/3, 2/3], [2/3, 1/3]])
+            targets       = np.array([[0, 1], [1, 0]])
+            predictions   = np.array([[np.log(4/9), np.log(5/9)], [np.log(5/9), np.log(4/9)]])
+            module_sizes  = np.array([2, 2])
+            predict_runner(train_pattern, targets, predictions, module_sizes, mode='log')
+
+        def testModuleSize2_3_2_log(self):
+            train_pattern = np.array([[1/3, 2/3, 1/4, 1/4, 2/4], [1, 0, 0, 1, 0]])
+            targets       = np.array([[0, 1], [1, 0]])
+            predictions   = np.array([[np.log(155/480), np.log(288/240)], [np.log(6/5), np.log(1/10)]])
+            module_sizes  = np.array([2, 3, 2])
+            predict_runner(train_pattern, targets, predictions, module_sizes, mode='log')
