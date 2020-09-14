@@ -1,4 +1,5 @@
 import numpy as np
+from .encoder import BinvecOneHotEncoder as ComplementaryUnitsEncoder
 
 class BCPNN:
     """
@@ -17,7 +18,7 @@ class BCPNN:
         # IN AN ATTRACTOR NETWORK WITH LOCAL COMPETITION", A. Lansner, 2006.
         self.g = g
 
-    def fit(self, X, Y, module_sizes):
+    def fit(self, X, Y, module_sizes=None):
         """Where X is an array of samples and Y is either:
 
         - an array of probabilities of respective sample belonging to each class
@@ -41,14 +42,20 @@ class BCPNN:
             self.classes_ = np.arange(Y.shape[1])
         self.n_classes_ = self.classes_.shape[0]
 
+        if module_sizes is None:
+            # assume complementary units, ie module size 2 for all modules
+            module_sizes = np.hstack((np.full(self.n_features_, 2), self.n_classes_))
+            self.X_ = ComplementaryUnitsEncoder.transform(X)
+            self.n_features_ = self.X_.shape[1]
+
         assert module_sizes.sum() == self.n_features_ + self.n_classes_
         self.module_sizes = module_sizes
-        self._assert_module_normalization(X)
+        self._assert_module_normalization(self.X_)
 
         # Extending X with y values allows us to work with
         # only one array throughout the code, enabling us to
         # write input/output-layer agnostic functions.
-        self.X_ = np.concatenate((self.X_, self.Y_), axis=1)
+        self.training_activations = np.concatenate((self.X_, self.Y_), axis=1)
         # Necessary padding into X to arrive at the y values
         self.y_pad = self.n_features_
 
@@ -171,13 +178,13 @@ class BCPNN:
         # P(x_i)
         # Check how many times x_i occured,
         # divided by the number of samples
-        return self.X_[:, i].sum() / self.n_training_samples
+        return self.training_activations[:, i].sum() / self.n_training_samples
 
     def _get_joint_prob(self, i, j):
         # P(x_i, x_j)
         # Check how many times x_i occured together with x_j,
         # divided by number of samples
-        return (self.X_[:, i] * self.X_[:, j]).sum() / self.n_training_samples
+        return (self.training_activations[:, i] * self.training_activations[:, j]).sum() / self.n_training_samples
 
     def _get_weights(self, i, j):
         # P(x_i, x_j) / ( P(x_i) x P(x_j) )
