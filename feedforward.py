@@ -158,7 +158,7 @@ class BCPNN:
     """
     def get_params(self, deep=True):
         # BCPNN takes no init arguments
-        return {"normalize": self.normalize, "G-value": self.G}
+        return {"normalize": self.normalize, "g": self.g}
 
     def set_params(self, **parameters):
         for parameter, value in parameters.items():
