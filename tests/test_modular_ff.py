@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 
-from feedforward_modular import BCPNN
+from BCPNN.feedforward_modular import BCPNN
 
 ## TEST UTILS
 def clf_factory(test_pattern, targets, module_sizes, normalize=True):
