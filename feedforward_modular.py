@@ -134,13 +134,14 @@ class BCPNN:
             return np.exp(np.where(support > 0, 0, support))
 
         expsup = np.exp(support * self.g)
-        expsup_copy = expsup.copy()
-        for sample_idx, sample in enumerate(expsup):
-            for sjj in range(self.n_classes_):
-                i, _ = self._flat_to_modular_idx(sjj + self.y_pad) # add ypad?
-                ii = self._modular_idx_to_flat(i, 0) - self.y_pad   # idx of start of module i
-                # when I get to second iter of sjj, expsup is already altered
-                expsup[sample_idx, sjj] /= expsup_copy[sample_idx, ii:ii+self.module_sizes[i]].sum()
+        # split returns views into existing array so we can work directly with expsup
+        # split using cumsum will always return one empty array, hence the :-1
+        modules = np.split(expsup, np.cumsum(self.module_sizes[-self.y_module_count:-1]), axis=1)
+        for m in modules:
+            module_sz = m.shape[1]
+            # sum the module and tile appropriately to enable elementwise division
+            total = np.tile(m.sum(axis=1), (module_sz, 1)).T
+            m /= total
         return expsup
 
     @staticmethod
