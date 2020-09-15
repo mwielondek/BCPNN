@@ -1,5 +1,5 @@
 import numpy as np
-from .encoder import BinvecOneHotEncoder as ComplementaryUnitsEncoder
+from .encoder import ComplementEncoder
 
 class BCPNN:
     """
@@ -18,7 +18,7 @@ class BCPNN:
         # IN AN ATTRACTOR NETWORK WITH LOCAL COMPETITION", A. Lansner, 2006.
         self.g = g
 
-    def fit(self, X, Y, module_sizes=None):
+    def fit(self, X, Y, module_sizes=None, y_module_count=1):
         """Where X is an array of samples and Y is either:
 
         - an array of probabilities of respective sample belonging to each class
@@ -45,11 +45,12 @@ class BCPNN:
         if module_sizes is None:
             # assume complementary units, ie module size 2 for all modules
             module_sizes = np.hstack((np.full(self.n_features_, 2), self.n_classes_))
-            self.X_ = ComplementaryUnitsEncoder.transform(X)
+            self.X_ = ComplementEncoder.transform(X)
             self.n_features_ = self.X_.shape[1]
 
         assert module_sizes.sum() == self.n_features_ + self.n_classes_
         self.module_sizes = module_sizes
+        self.y_module_count = y_module_count
         self._assert_module_normalization(self.X_)
 
         # Extending X with y values allows us to work with
@@ -104,9 +105,9 @@ class BCPNN:
 
     def _assert_module_normalization(self, X):
         """ Checks that the values in each module sum up to 1"""
-        modules = np.split(X, np.cumsum(self.module_sizes[:-1]), axis=1)
-        equals_one = np.array([module.sum(axis=1) for module in modules if module.size > 0]) == 1
-        if not equals_one.all():
+        modules = np.split(X, np.cumsum(self.module_sizes[:-self.y_module_count]), axis=1)
+        sum_to_one = np.allclose([module.sum(axis=1) for module in modules if module.size > 0], 1)
+        if not sum_to_one:
             raise self.NormalizationError("values within each module should sum up to 1")
 
     class NormalizationError(ValueError):

@@ -1,7 +1,7 @@
 import numpy as np
-from .feedforward import BCPNN as ffBCPNN
+from .feedforward_modular import BCPNN as ffBCPNN
 
-class rBCPNN(ffBCPNN):
+class rmBCPNN(ffBCPNN):
     """ A recurrent version of the Bayesian Confidence
     Propagation Neural Network (BCPNN).
 
@@ -15,9 +15,13 @@ class rBCPNN(ffBCPNN):
         self.PROB_THRESHOLD = prob_threshold
         self.VERBOSE = verbose
 
-    def fit(self, X):
+    def fit(self, X, module_sizes=None):
         n_samples, n_features = X.shape
-        super().fit(X, X)
+        # correct module_sizes unless set manually; the default implementation sets one big output module
+        if module_sizes is None:
+            module_sizes = np.full(n_features, 2)
+            y_module_count = n_features // 2
+        super().fit(X, X, module_sizes=module_sizes, y_module_count=y_module_count)
 
     def predict(self, X, return_binary=False):
         input = X

@@ -83,6 +83,7 @@ class TestUnitTests:
         def testCheckNormalization1(self, clf):
             X = np.array([[0, 1]])
             clf.module_sizes = np.array([2, 2])
+            clf.y_module_count = 1
             clf._assert_module_normalization(X)
 
             X = np.array([[1, 1]])
@@ -93,6 +94,7 @@ class TestUnitTests:
         def testCheckNormalization2(self, clf):
             X = np.array([[0, 1], [1/2, 1/2]])
             clf.module_sizes = np.array([2, 2])
+            clf.y_module_count = 1
             clf._assert_module_normalization(X)
 
             X = np.array([[1, 1], [1/2, 1/2]])
@@ -103,6 +105,7 @@ class TestUnitTests:
         def testCheckNormalization3(self, clf):
             X = np.array([[0, 1/2, 1/2, 1/2, 1/2]])
             clf.module_sizes = np.array([3, 2, 2])
+            clf.y_module_count = 1
             clf._assert_module_normalization(X)
 
             X = np.array([[1, 1, 1, 1, 1]])
