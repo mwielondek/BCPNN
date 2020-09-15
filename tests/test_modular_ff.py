@@ -2,6 +2,7 @@ import pytest
 import numpy as np
 
 from BCPNN.feedforward_modular import BCPNN
+from BCPNN.encoder import ComplementEncoder
 
 ## TEST UTILS
 def clf_factory(test_pattern, targets, module_sizes, normalize=True):
@@ -29,6 +30,13 @@ def predict_runner(train_pattern, targets, predictions, module_sizes,
     assert np.allclose(output, predictions, atol=atol)
 
 class TestUnitTests:
+
+    def testComplementEncoder(self):
+        X = np.array([[0.5, 0.2], [1, 0]])
+        Xt = ComplementEncoder.transform(X)
+        assert np.array_equal(Xt, np.array([[0.5, 0.5, 0.2, 0.8], [1, 0, 0, 1]]))
+        assert np.array_equal(ComplementEncoder.inverse_transform(Xt), X)
+
 
     @pytest.fixture(scope="function")
     def clf(self):

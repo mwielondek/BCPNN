@@ -40,3 +40,24 @@ class BinvecOneHotEncoder:
         for i, pattern in enumerate(X):
             X_inv[i] = pattern[::2]
         return X_inv
+
+class ComplementEncoder:
+    """
+    Encodes data onto the complement form:
+    x -> [x, 1-x]
+    """
+
+    @staticmethod
+    def transform(X):
+        """
+        Transforms a vector of real values within the range (0, 1) onto complementary units form.
+
+        >>> ComplementEncoder.transform([[0.5, 0.2]])
+        array([[0.5, 0.5, 0.2, 0.8]])
+        """
+        X = np.array(X)
+        return np.dstack((X, 1-X)).reshape(X.shape[0], X.shape[1] * 2)
+
+    @staticmethod
+    def inverse_transform(X):
+        return np.array(X)[:, ::2]
