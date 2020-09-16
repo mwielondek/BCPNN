@@ -71,10 +71,13 @@ class TestUnitTests:
         assert clf._modular_idx_to_flat(*modular) == flat
         assert clf._flat_to_modular_idx(flat) == modular
 
-    def testEmptyModuleSize(self, clf):
+    def testEmptyModuleSizeAndTransformX(self, clf):
         X = np.array([[0, 1]])
         y = np.array([[1]])
-        clf.fit(X, y)
+        clf.fit(X, y, transformX=False)
+        assert np.array_equal(clf.X_, X)
+        assert np.array_equal(clf.module_sizes, [2, 1])
+        clf.fit(X, y, transformX=True)
         assert np.array_equal(clf.X_, [[0,1, 1,0]])
         assert np.array_equal(clf.module_sizes, [2, 2, 1])
 

@@ -18,7 +18,7 @@ class BCPNN:
         # IN AN ATTRACTOR NETWORK WITH LOCAL COMPETITION", A. Lansner, 2006.
         self.g = g
 
-    def fit(self, X, Y, module_sizes=None):
+    def fit(self, X, Y, module_sizes=None, transformX=False):
         """Where X is an array of samples and Y is either:
 
         - an array of probabilities of respective sample belonging to each class
@@ -31,6 +31,9 @@ class BCPNN:
 
         assert X.shape[0] == Y.shape[0]
 
+        if transformX:
+            # if X are not on the complement unit form
+            X = ComplementEncoder.transform(X)
         self.X_ = X
         self.n_training_samples, self.n_features_ = X.shape
 
@@ -43,10 +46,8 @@ class BCPNN:
         self.n_classes_ = self.classes_.shape[0]
 
         if module_sizes is None:
-            # assume complementary units, ie module size 2 for all modules
-            module_sizes = np.hstack((np.full(self.n_features_, 2), self.n_classes_))
-            self.X_ = ComplementEncoder.transform(X)
-            self.n_features_ = self.X_.shape[1]
+            # assume complementary units, ie module size 2 for all X modules
+            module_sizes = np.hstack((np.full(self.n_features_ // 2, 2), self.n_classes_))
 
         assert module_sizes.sum() == self.n_features_ + self.n_classes_
         self.module_sizes = module_sizes
