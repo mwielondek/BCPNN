@@ -79,6 +79,7 @@ class BCPNN:
             for j in range(self.n_classes_):
                 self.weights[i][j] = self._get_weights(i, j + self.y_pad)
 
+    @_transformX_enabled
     def predict_log_proba(self, X):
         """Classify and return the log probabilities of each sample
         belonging to respective class."""
@@ -98,17 +99,20 @@ class BCPNN:
                 s[sample, sjj] = beta[sjj] + sigma_log
         return s
 
+    @_transformX_enabled
     def predict_proba(self, X):
         """Classify and return the probabilities of each sample
         belonging to respective class."""
         return self._transfer_fn(self.predict_log_proba(X))
 
+    @_transformX_enabled
     def predict(self, X):
         """Classify and return the class index of each sample."""
         probabilities = self.predict_proba(X)
         max_probability_class = list(map(np.argmax, probabilities))
         return self.classes_[max_probability_class]
 
+    @_transformX_enabled
     def score(self, X, y):
         """Classify and compare the predicted labels with y, returning
         the mean accuracy."""
