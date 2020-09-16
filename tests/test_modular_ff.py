@@ -113,6 +113,15 @@ class TestUnitTests:
             with pytest.raises(BCPNN.NormalizationError):
                 clf.fit(X, X[:, :2], module_sizes)
 
+        def testCheckNormalization4(self, clf):
+            # No module sizes given
+            X = np.array([[0, 1]])
+            clf.fit(X, X)
+
+            X = np.array([[1, 1]])
+            with pytest.raises(BCPNN.NormalizationError):
+                clf.fit(X, X)
+
 class TestModule:
 
     class TestBinary:
