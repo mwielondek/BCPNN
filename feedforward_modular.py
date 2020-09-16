@@ -18,7 +18,19 @@ class BCPNN:
         # IN AN ATTRACTOR NETWORK WITH LOCAL COMPETITION", A. Lansner, 2006.
         self.g = g
 
-    def fit(self, X, Y, module_sizes=None, transformX=False):
+    def _transformX_enabled(fn):
+        """Adds a transformX parameter and subsequent logic. Function needs to take X as first argument"""
+
+        def wrapper(self, X, *args, transformX=False, **kwargs):
+            if transformX:
+                # if X are not on the complement unit form
+                X = ComplementEncoder.transform(X)
+            return fn(self, X, *args, **kwargs)
+
+        return wrapper
+
+    @_transformX_enabled
+    def fit(self, X, Y, module_sizes=None):
         """Where X is an array of samples and Y is either:
 
         - an array of probabilities of respective sample belonging to each class
@@ -31,9 +43,6 @@ class BCPNN:
 
         assert X.shape[0] == Y.shape[0]
 
-        if transformX:
-            # if X are not on the complement unit form
-            X = ComplementEncoder.transform(X)
         self.X_ = X
         self.n_training_samples, self.n_features_ = X.shape
 
