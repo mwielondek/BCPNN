@@ -18,7 +18,7 @@ class BCPNN:
         # IN AN ATTRACTOR NETWORK WITH LOCAL COMPETITION", A. Lansner, 2006.
         self.g = g
 
-    def fit(self, X, Y, module_sizes=None, y_module_count=1):
+    def fit(self, X, Y, module_sizes=None):
         """Where X is an array of samples and Y is either:
 
         - an array of probabilities of respective sample belonging to each class
@@ -50,7 +50,8 @@ class BCPNN:
 
         assert module_sizes.sum() == self.n_features_ + self.n_classes_
         self.module_sizes = module_sizes
-        self.y_module_count = y_module_count
+        # How many modules Y consists of
+        self.n_modules_y = np.flatnonzero(np.cumsum(self.module_sizes[::-1]) == self.n_classes_)[0] + 1
         self._assert_module_normalization(self.X_)
 
         # Extending X with y values allows us to work with
@@ -61,7 +62,7 @@ class BCPNN:
         self.y_pad = self.n_features_
 
         # Pre-calculate beta and weights
-        self.beta = [self._get_beta(self.y_pad + j) for j in self.classes_]
+        self.beta = np.array([self._get_beta(self.y_pad + j) for j in self.classes_])
 
         self.weights = np.zeros((self.n_features_, self.n_classes_))
         for i in range(self.n_features_):
@@ -75,7 +76,7 @@ class BCPNN:
         beta = self.beta
         n_samples = X.shape[0]
         s = np.zeros((n_samples, self.n_classes_))
-        n_modules_j = np.flatnonzero(np.cumsum(self.module_sizes[::-1]) == self.n_classes_)[0] + 1
+        n_modules_j = self.n_modules_y
         n_modules_i = self.module_sizes.size - n_modules_j
         for sample in range(X.shape[0]):
             for sjj in range(self.n_classes_):
@@ -105,7 +106,7 @@ class BCPNN:
 
     def _assert_module_normalization(self, X):
         """ Checks that the values in each module sum up to 1"""
-        modules = np.split(X, np.cumsum(self.module_sizes[:-self.y_module_count]), axis=1)
+        modules = np.split(X, np.cumsum(self.module_sizes[:-self.n_modules_y]), axis=1)
         sum_to_one = np.allclose([module.sum(axis=1) for module in modules if module.size > 0], 1)
         if not sum_to_one:
             raise self.NormalizationError("values within each module should sum up to 1")
@@ -136,7 +137,7 @@ class BCPNN:
         expsup = np.exp(support * self.g)
         # split returns views into existing array so we can work directly with expsup
         # split using cumsum will always return one empty array, hence the :-1
-        modules = np.split(expsup, np.cumsum(self.module_sizes[-self.y_module_count:-1]), axis=1)
+        modules = np.split(expsup, np.cumsum(self.module_sizes[-self.n_modules_y:-1]), axis=1)
         for m in modules:
             module_sz = m.shape[1]
             # sum the module and tile appropriately to enable elementwise division

@@ -82,36 +82,33 @@ class TestUnitTests:
 
         def testCheckNormalization1(self, clf):
             X = np.array([[0, 1]])
-            clf.module_sizes = np.array([2, 2])
-            clf.y_module_count = 1
-            clf._assert_module_normalization(X)
+            module_sizes = np.array([2, 2])
+            clf.fit(X, X, module_sizes)
 
             X = np.array([[1, 1]])
-            clf.module_sizes = np.array([2, 2])
             with pytest.raises(BCPNN.NormalizationError):
-                clf._assert_module_normalization(X)
+                clf.fit(X, X, module_sizes)
 
         def testCheckNormalization2(self, clf):
             X = np.array([[0, 1], [1/2, 1/2]])
-            clf.module_sizes = np.array([2, 2])
-            clf.y_module_count = 1
+            module_sizes = np.array([2, 2])
+            clf.fit(X, X, module_sizes)
             clf._assert_module_normalization(X)
 
             X = np.array([[1, 1], [1/2, 1/2]])
-            clf.module_sizes = np.array([2, 2])
+            module_sizes = np.array([2, 2])
             with pytest.raises(BCPNN.NormalizationError):
-                clf._assert_module_normalization(X)
+                clf.fit(X, X, module_sizes)
 
         def testCheckNormalization3(self, clf):
             X = np.array([[0, 1/2, 1/2, 1/2, 1/2]])
-            clf.module_sizes = np.array([3, 2, 2])
-            clf.y_module_count = 1
-            clf._assert_module_normalization(X)
+            module_sizes = np.array([3, 2, 2])
+            clf.fit(X, X[:, :2], module_sizes)
 
             X = np.array([[1, 1, 1, 1, 1]])
-            clf.module_sizes = np.array([3, 2, 2])
+            module_sizes = np.array([3, 2, 2])
             with pytest.raises(BCPNN.NormalizationError):
-                clf._assert_module_normalization(X)
+                clf.fit(X, X[:, :2], module_sizes)
 
 class TestModule:
 
