@@ -120,8 +120,8 @@ class BCPNN:
 
     def _assert_module_normalization(self, X):
         """ Checks that the values in each module sum up to 1"""
-        modules = np.split(X, np.cumsum(self.module_sizes[:-self.n_modules_y]), axis=1)
-        sum_to_one = np.allclose([module.sum(axis=1) for module in modules if module.size > 0], 1)
+        modules = np.split(X, np.cumsum(self.module_sizes[:-self.n_modules_y-1]), axis=1)
+        sum_to_one = np.allclose([module.sum(axis=1) for module in modules], 1)
         if not sum_to_one:
             raise self.NormalizationError("values within each module should sum up to 1")
 
