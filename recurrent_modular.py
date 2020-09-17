@@ -21,7 +21,7 @@ class rmBCPNN(ffBCPNN):
         if module_sizes is None:
             module_sizes = np.full(n_features, 2)
             y_module_count = n_features // 2
-        super().fit(X, X, module_sizes=module_sizes, y_module_count=y_module_count)
+        super().fit(X, X, module_sizes=module_sizes)
 
     def predict(self, X, return_binary=False):
         input = X
