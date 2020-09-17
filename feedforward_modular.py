@@ -62,6 +62,7 @@ class BCPNN:
         self.module_sizes = module_sizes
         # How many modules Y consists of
         self.n_modules_y = np.flatnonzero(np.cumsum(self.module_sizes[::-1]) == self.n_classes_)[0] + 1
+        self.n_modules_x = self.module_sizes.size - self.n_modules_y
         self._assert_module_normalization(self.X_)
 
         # Extending X with y values allows us to work with
@@ -84,20 +85,18 @@ class BCPNN:
         """Classify and return the log probabilities of each sample
         belonging to respective class."""
         self._assert_module_normalization(X)
-        beta = self.beta
+        beta = self.beta # of shape n_classes_
         n_samples = X.shape[0]
-        s = np.zeros((n_samples, self.n_classes_))
-        n_modules_j = self.n_modules_y
-        n_modules_i = self.module_sizes.size - n_modules_j
-        for sample in range(X.shape[0]):
-            for sjj in range(self.n_classes_):
-                theta = np.zeros(n_modules_i)
-                for i in range(theta.shape[0]):
-                    ii = self._modular_idx_to_flat(i, 0)   # idx of start of module i
-                    theta[i] = self.weights[ii:ii+self.module_sizes[i], sjj].dot(X[sample, ii:ii+self.module_sizes[i]].T)
-                sigma_log = np.log(theta).sum()
-                s[sample, sjj] = beta[sjj] + sigma_log
-        return s
+        # split weights and input into modules
+        sections = np.cumsum(self.module_sizes[:-self.n_modules_y-1])
+        splitter = lambda x: np.split(x, sections, axis=1)
+        modules = [splitter(x) for x in [self.weights.T, X]]
+        module_sum = np.zeros((n_samples, self.n_classes_, self.n_modules_x))
+        for i, (w, x) in enumerate(zip(*modules)):
+            wx = w.dot(x.T)  # j x n_samples
+            module_sum[:, :, i] = np.log(wx.T)
+        outer_sum = module_sum.sum(axis=2)
+        return beta + outer_sum
 
     @_transformX_enabled
     def predict_proba(self, X):
