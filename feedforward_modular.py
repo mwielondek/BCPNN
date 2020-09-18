@@ -82,6 +82,7 @@ class BCPNN:
         for i in range(self.n_features_):
             for j in range(self.n_classes_):
                 self.weights[i][j] = self._get_weights(i, j + self.y_pad)
+        self.weight_modules = np.split(self.weights.T, self.x_module_sections, axis=1)
 
     @_transformX_enabled
     def predict_log_proba(self, X, assert_off=False):
@@ -92,14 +93,14 @@ class BCPNN:
         beta = self.beta # of shape n_classes_
         n_samples = X.shape[0]
         # split weights and input into modules
-        splitter = lambda x: np.split(x, self.x_module_sections, axis=1)
-        modules = [splitter(x) for x in [self.weights.T, X]]
+        x_modules = np.split(X, self.x_module_sections, axis=1)
+        w_x_modules = zip(self.weight_modules, x_modules)
         # reduce all modules onto a logged dot product of the weights and inputs
         def f(acc, modules_w_x):
             w, x = modules_w_x
             wx = w.dot(x.T)
             return acc + np.log(wx.T)
-        outer_sum = reduce(f, zip(*modules), 0)
+        outer_sum = reduce(f, w_x_modules, 0)
         return beta + outer_sum
 
     @_transformX_enabled
