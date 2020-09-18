@@ -30,7 +30,7 @@ class rmBCPNN(ffBCPNN):
         while  (iter < self.MAX_ITER and \
                 not np.allclose(input, prev, atol=self.TOL, rtol=0)):
             prev = input
-            input = self.predict_proba(prev)
+            input = self.predict_proba(prev, assert_off=True)
             iter += 1
         if return_binary:
             input = self._binarize(input, self.PROB_THRESHOLD)

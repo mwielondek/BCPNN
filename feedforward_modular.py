@@ -82,10 +82,11 @@ class BCPNN:
                 self.weights[i][j] = self._get_weights(i, j + self.y_pad)
 
     @_transformX_enabled
-    def predict_log_proba(self, X):
+    def predict_log_proba(self, X, assert_off=False):
         """Classify and return the log probabilities of each sample
         belonging to respective class."""
-        self._assert_module_normalization(X)
+        if not assert_off:
+            self._assert_module_normalization(X)
         beta = self.beta # of shape n_classes_
         n_samples = X.shape[0]
         # split weights and input into modules
@@ -101,10 +102,10 @@ class BCPNN:
         return beta + outer_sum
 
     @_transformX_enabled
-    def predict_proba(self, X):
+    def predict_proba(self, X, **kwargs):
         """Classify and return the probabilities of each sample
         belonging to respective class."""
-        return self._transfer_fn(self.predict_log_proba(X))
+        return self._transfer_fn(self.predict_log_proba(X, **kwargs))
 
     @_transformX_enabled
     def predict(self, X):
