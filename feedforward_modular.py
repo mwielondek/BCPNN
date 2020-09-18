@@ -1,4 +1,5 @@
 import numpy as np
+from functools import reduce
 from .encoder import ComplementEncoder
 
 class BCPNN:
@@ -91,11 +92,12 @@ class BCPNN:
         sections = np.cumsum(self.module_sizes[:-self.n_modules_y-1])
         splitter = lambda x: np.split(x, sections, axis=1)
         modules = [splitter(x) for x in [self.weights.T, X]]
-        module_sum = np.zeros((n_samples, self.n_classes_, self.n_modules_x))
-        for i, (w, x) in enumerate(zip(*modules)):
-            wx = w.dot(x.T)  # j x n_samples
-            module_sum[:, :, i] = np.log(wx.T)
-        outer_sum = module_sum.sum(axis=2)
+        # reduce all modules onto a logged dot product of the weights and inputs
+        def f(acc, modules_w_x):
+            w, x = modules_w_x
+            wx = w.dot(x.T)
+            return acc + np.log(wx.T)
+        outer_sum = reduce(f, zip(*modules), 0)
         return beta + outer_sum
 
     @_transformX_enabled
