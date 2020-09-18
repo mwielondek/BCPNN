@@ -65,6 +65,8 @@ class BCPNN:
         self.n_modules_y = np.flatnonzero(np.cumsum(self.module_sizes[::-1]) == self.n_classes_)[0] + 1
         self.n_modules_x = self.module_sizes.size - self.n_modules_y
         self._assert_module_normalization(self.X_)
+        self.x_module_sections = np.cumsum(self.module_sizes[:-self.n_modules_y-1])
+        self.y_module_sections = np.cumsum(self.module_sizes[-self.n_modules_y:-1])
 
         # Extending X with y values allows us to work with
         # only one array throughout the code, enabling us to
@@ -90,8 +92,7 @@ class BCPNN:
         beta = self.beta # of shape n_classes_
         n_samples = X.shape[0]
         # split weights and input into modules
-        sections = np.cumsum(self.module_sizes[:-self.n_modules_y-1])
-        splitter = lambda x: np.split(x, sections, axis=1)
+        splitter = lambda x: np.split(x, self.x_module_sections, axis=1)
         modules = [splitter(x) for x in [self.weights.T, X]]
         # reduce all modules onto a logged dot product of the weights and inputs
         def f(acc, modules_w_x):
@@ -153,7 +154,7 @@ class BCPNN:
         expsup = np.exp(support * self.g)
         # split returns views into existing array so we can work directly with expsup
         # split using cumsum will always return one empty array, hence the :-1
-        modules = np.split(expsup, np.cumsum(self.module_sizes[-self.n_modules_y:-1]), axis=1)
+        modules = np.split(expsup, self.y_module_sections, axis=1)
         for m in modules:
             module_sz = m.shape[1]
             # sum the module and tile appropriately to enable elementwise division
