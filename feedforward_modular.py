@@ -31,8 +31,8 @@ class BCPNN:
         return wrapper
 
     @_transformX_enabled
-    def fit(self, X, Y, module_sizes=None):
-        """Where X is an array of samples and Y is either:
+    def fit(self, X, y, module_sizes=None):
+        """Where X is an array of samples and y is either:
 
         - an array of probabilities of respective sample belonging to each class
         OR
@@ -42,17 +42,17 @@ class BCPNN:
         and module_sizes is an array designating the size of each module (= hypercolumn)
         """
 
-        assert X.shape[0] == Y.shape[0]
+        assert X.shape[0] == y.shape[0]
 
         self.X_ = X
         self.n_training_samples, self.n_features_ = X.shape
 
-        if Y.ndim == 1:
-            self.classes_ = self._unique_labels(Y)
-            self.Y_ = self._class_idx_to_prob(Y)
+        if y.ndim == 1:
+            self.classes_ = self._unique_labels(y)
+            self.Y_ = self._class_idx_to_prob(y)
         else:
-            self.Y_ = Y
-            self.classes_ = np.arange(Y.shape[1])
+            self.Y_ = y
+            self.classes_ = np.arange(y.shape[1])
         self.n_classes_ = self.classes_.shape[0]
 
         if module_sizes is None:
@@ -61,7 +61,7 @@ class BCPNN:
 
         assert module_sizes.sum() == self.n_features_ + self.n_classes_, "wrong dim of module_sizes"
         self.module_sizes = module_sizes
-        # How many modules Y consists of
+        # How many modules y consists of
         self.n_modules_y = np.flatnonzero(np.cumsum(self.module_sizes[::-1]) == self.n_classes_)[0] + 1
         self.n_modules_x = self.module_sizes.size - self.n_modules_y
         self._assert_module_normalization(self.X_)
