@@ -59,7 +59,7 @@ class BCPNN:
             # assume complementary units, ie module size 2 for all X modules
             module_sizes = np.hstack((np.full(self.n_features_ // 2, 2), self.n_classes_))
 
-        assert module_sizes.sum() == self.n_features_ + self.n_classes_
+        assert module_sizes.sum() == self.n_features_ + self.n_classes_, "wrong dim of module_sizes"
         self.module_sizes = module_sizes
         # How many modules Y consists of
         self.n_modules_y = np.flatnonzero(np.cumsum(self.module_sizes[::-1]) == self.n_classes_)[0] + 1
