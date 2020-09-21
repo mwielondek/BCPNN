@@ -1,8 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from .recurrent import rBCPNN
-
 def count_unique_patterns(X, decimals=None):
     """Returns distinct pattern count, rounding up to `decimals`"""
     if decimals:
@@ -30,15 +28,12 @@ def get_cluster_ids(X, decimals=None):
             arr[sample] = cidx
     return arr
 
-def collect_cluster_ids(X, gvals, decimals=None, clf=None):
+def collect_cluster_ids(clf, X, gvals, decimals=None):
     """Get cluster IDs as a function of g values"""
     n_samples, _ = X.shape
     n_gvals = len(gvals)
     clusters = np.empty((n_gvals, n_samples))
 
-    if clf is None:
-        # TODO find optimal values for tol and max_iter
-        clf = rBCPNN(normalize=True, tol=1e-15, max_iter=1e8, g=1)
     clf.fit(X)
 
     clf.g = gvals[0]
