@@ -68,14 +68,19 @@ class OneHotEncoder:
     Uses sklearn's OneHotEncoder and returns module sizes for use with fit method. For use with discrete features.
     """
 
-    @staticmethod
-    def transform(X, y=None):
-        encoder = skEncoder(sparse=False)
-        X_t = encoder.fit_transform(X)
-        mod_sz = list(map(len, (encoder.categories_)))
+    def fit(self, X, y=None):
+        self.encoder = skEncoder(sparse=False).fit(X)
+        mod_sz = list(map(len, (self.encoder.categories_)))
         # append y modules if given
         if y is not None:
             y_module_size = np.unique(y).size
             mod_sz = np.hstack((mod_sz, y_module_size))
+        self.module_sizes_ = mod_sz
+        return self
 
-        return (X_t, mod_sz)
+    def transform(self, X):
+        return self.encoder.transform(X)
+
+    def fit_transform(self, X, y=None):
+        self.fit(X, y)
+        return self.transform(X)
