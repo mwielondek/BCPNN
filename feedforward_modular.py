@@ -1,6 +1,6 @@
 import numpy as np
 from functools import reduce
-from .encoder import ComplementEncoder
+from .encoder import OneHotEncoder
 
 class BCPNN:
     """
@@ -25,13 +25,12 @@ class BCPNN:
         def wrapper(self, X, *args, transformX=False, **kwargs):
             if transformX:
                 # if X are not on the complement unit form
-                X = ComplementEncoder.transform(X)
+                X = self.encoder.transform(X)
             return fn(self, X, *args, **kwargs)
 
         return wrapper
 
-    @_transformX_enabled
-    def fit(self, X, y, module_sizes=None):
+    def fit(self, X, y, module_sizes=None, transformX=False):
         """Where X is an array of samples and y is either:
 
         - an array of probabilities of respective sample belonging to each class
@@ -44,9 +43,6 @@ class BCPNN:
 
         assert X.shape[0] == y.shape[0]
 
-        self.X_ = X
-        self.n_training_samples, self.n_features_ = X.shape
-
         if y.ndim == 1:
             self.classes_ = self._unique_labels(y)
             self.Y_ = self._class_idx_to_prob(y)
@@ -54,6 +50,14 @@ class BCPNN:
             self.Y_ = y
             self.classes_ = np.arange(y.shape[1])
         self.n_classes_ = self.classes_.shape[0]
+
+        if transformX:
+            self.encoder = OneHotEncoder()
+            X = self.encoder.fit_transform(X, self.classes_)
+            module_sizes = self.encoder.module_sizes_
+
+        self.X_ = X
+        self.n_training_samples, self.n_features_ = X.shape
 
         if module_sizes is None:
             # assume complementary units, ie module size 2 for all X modules

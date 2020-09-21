@@ -71,15 +71,53 @@ class TestUnitTests:
         assert clf._modular_idx_to_flat(*modular) == flat
         assert clf._flat_to_modular_idx(flat) == modular
 
-    def testEmptyModuleSizeAndTransformX(self, clf):
-        X = np.array([[0, 1]])
-        y = np.array([[1]])
-        clf.fit(X, y, transformX=False)
-        assert np.array_equal(clf.X_, X)
-        assert np.array_equal(clf.module_sizes, [2, 1])
-        clf.fit(X, y, transformX=True)
-        assert np.array_equal(clf.X_, [[0,1, 1,0]])
-        assert np.array_equal(clf.module_sizes, [2, 2, 1])
+    class TestTransformX:
+
+        def testEmptyModuleSize(self, clf):
+            X = np.array([[0, 1]])
+            y = np.array([0])
+            clf.fit(X, y, transformX=False)
+            assert np.array_equal(clf.X_, X)
+            assert np.array_equal(clf.module_sizes, [2, 1])
+
+        def testTransformX0(self, clf):
+            X = np.array([[0, 1]])
+            y = np.array([0])
+            clf.fit(X, y, transformX=True)
+            assert np.array_equal(clf.X_, [[1,0, 0,1]])
+            assert np.array_equal(clf.module_sizes, [2, 2, 1])
+
+        def testTransformX1(self, clf):
+            # One discrete feature
+            X = np.array([[1], [2], [3]])
+            y = np.array([0, 1, 2])
+            clf.fit(X, y, transformX=True)
+            X_pred = np.array([ [1, 0, 0],
+            [0, 1, 0],
+            [0, 0, 1] ])
+            assert np.array_equal(clf.X_, X_pred)
+            assert np.array_equal(clf.module_sizes, [3, 3])
+
+        def testTransformX2(self, clf):
+            # One binary feature
+            X = np.array([[1], [1], [2]])
+            y = np.array([0, 1, 2])
+            clf.fit(X, y, transformX=True)
+            X_pred = np.array([[1, 0], [1, 0], [0, 1]])
+            assert np.array_equal(clf.X_, X_pred)
+            assert np.array_equal(clf.module_sizes, [2, 3])
+
+        def testTransformX3(self, clf):
+            # One binary, one discrete
+            X = np.array([[1, 1], [1, 2], [2, 3]])
+            y = np.array([0, 0, 0])
+            clf.fit(X, y, transformX=True)
+            X_pred = np.array([ [1, 0, 1, 0, 0],
+            [1, 0, 0, 1, 0],
+            [0, 1, 0, 0, 1] ])
+            assert np.array_equal(clf.X_, X_pred)
+            assert np.array_equal(clf.module_sizes, [2, 3, 1])
+
 
     class TestNormalization:
 

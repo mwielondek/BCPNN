@@ -63,24 +63,26 @@ class ComplementEncoder:
     def inverse_transform(X):
         return np.array(X)[:, ::2]
 
-class OneHotEncoder:
+class OneHotEncoder(skEncoder):
     """
     Uses sklearn's OneHotEncoder and returns module sizes for use with fit method. For use with discrete features.
     """
+    def __init__(self):
+        return super().__init__(sparse=False)
 
     def fit(self, X, y=None):
-        self.encoder = skEncoder(sparse=False).fit(X)
-        mod_sz = list(map(len, (self.encoder.categories_)))
+        super().fit(X)
+        mod_sz = list(map(len, (self.categories_)))
+        if 1 in mod_sz:
+            # Amend categories; zero variance features (all same value) will have a single category
+            # We want to transform it onto binary form, ie each feature should at least have two categories
+            # (categories is a standard list of unequal element size, so we can't use numpy's array indexing)
+            for i in np.where(np.array(mod_sz) == 1)[0]:
+                self.categories_[i] = np.array([0, 1])
+            mod_sz = list(map(len, (self.categories_)))
         # append y modules if given
         if y is not None:
             y_module_size = np.unique(y).size
             mod_sz = np.hstack((mod_sz, y_module_size))
         self.module_sizes_ = mod_sz
         return self
-
-    def transform(self, X):
-        return self.encoder.transform(X)
-
-    def fit_transform(self, X, y=None):
-        self.fit(X, y)
-        return self.transform(X)
