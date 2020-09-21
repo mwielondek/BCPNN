@@ -10,4 +10,4 @@ The single-layered feedforward version can be used for classification tasks, whi
 Instantiate classifier, then `fit`, and `predict` or `predict_proba` for classification. The API closely follows the method naming convention of sklearn's classifiers, and so should be straightforward to use for familiar users.
 
 ## Dependencies
-numpy, and pytest for running tests. Run `$ pip install -r requirements(_dev).txt` to install.
+Mainly numpy + sklearn for its OneHotEncoder, and pytest for running tests. Run `$ pip install -r requirements(_dev).txt` to install.
