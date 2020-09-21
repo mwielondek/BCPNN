@@ -1,5 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
 
 def count_unique_patterns(X, decimals=None):
     """Returns distinct pattern count, rounding up to `decimals`"""
