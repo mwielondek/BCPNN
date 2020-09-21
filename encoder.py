@@ -1,4 +1,5 @@
 import numpy as np
+from sklearn.preprocessing import OneHotEncoder as skEncoder
 
 class BinvecOneHotEncoder:
     """
@@ -61,3 +62,20 @@ class ComplementEncoder:
     @staticmethod
     def inverse_transform(X):
         return np.array(X)[:, ::2]
+
+class OneHotEncoder:
+    """
+    Uses sklearn's OneHotEncoder and returns module sizes for use with fit method. For use with discrete features.
+    """
+
+    @staticmethod
+    def transform(X, y=None):
+        encoder = skEncoder(sparse=False)
+        X_t = encoder.fit_transform(X)
+        mod_sz = list(map(len, (encoder.categories_)))
+        # append y modules if given
+        if y is not None:
+            y_module_size = np.unique(y).size
+            mod_sz = np.hstack((mod_sz, y_module_size))
+
+        return (X_t, mod_sz)
