@@ -27,21 +27,21 @@ def get_cluster_ids(X, decimals=None):
             arr[sample] = cidx
     return arr
 
-def collect_cluster_ids(clf, X, gvals, decimals=None):
+def collect_cluster_ids(clf, X, gvals, decimals=None, fit_params=None, predict_params=None):
     """Get cluster IDs as a function of g values"""
     n_samples, _ = X.shape
     n_gvals = len(gvals)
     clusters = np.empty((n_gvals, n_samples))
 
-    clf.fit(X)
+    clf.fit(X, **fit_params)
 
     clf.g = gvals[0]
-    pred = clf.predict(X)
+    pred = clf.predict(X, **predict_params)
     clusters[0] = get_cluster_ids(pred, decimals=decimals)
 
     for idx, g in list(enumerate(gvals))[1:]:
         clf.g = g
-        pred = clf.predict(X)
+        pred = clf.predict(X, **predict_params)
         prev = clusters[idx-1]
         current = get_cluster_ids(pred, decimals=decimals)
         clusters[idx] = current
