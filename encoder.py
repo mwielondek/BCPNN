@@ -48,13 +48,7 @@ class ComplementEncoder:
     x -> [x, 1-x]
     """
 
-    def fit_transform(self, X, y=None):
-        """
-        Transforms a vector of real values within the range (0, 1) onto complementary units form.
-
-        >>> ComplementEncoder.transform([[0.5, 0.2]])
-        array([[0.5, 0.5, 0.2, 0.8]])
-        """
+    def fit(self, X, y=None):
         X = np.array(X)
         n_features = X.shape[1]
         mod_sz = np.full(n_features, 2)
@@ -63,7 +57,21 @@ class ComplementEncoder:
             y_module_size = np.unique(y).size
             mod_sz = np.hstack((mod_sz, y_module_size))
         self.module_sizes_ = mod_sz
+        return self
+
+    def transform(self, X):
+        """
+        Transforms a vector of real values within the range (0, 1) onto complementary units form.
+
+        >>> ComplementEncoder.transform([[0.5, 0.2]])
+        array([[0.5, 0.5, 0.2, 0.8]])
+        """
+        X = np.array(X)
         return np.dstack((X, 1-X)).reshape(X.shape[0], X.shape[1] * 2)
+
+    def fit_transform(self, X, y=None):
+        self.fit(X, y)
+        return self.transform(X)
 
     @staticmethod
     def inverse_transform(X):
