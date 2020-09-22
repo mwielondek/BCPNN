@@ -57,8 +57,12 @@ class ComplementEncoder:
         """
         X = np.array(X)
         n_features = X.shape[1]
-        n_classes = np.unique(y).size
-        self.module_sizes_ = np.hstack((np.full(n_features, 2), n_classes))
+        mod_sz = np.full(n_features, 2)
+        # append y modules if given
+        if y is not None:
+            y_module_size = np.unique(y).size
+            mod_sz = np.hstack((mod_sz, y_module_size))
+        self.module_sizes_ = mod_sz
         return np.dstack((X, 1-X)).reshape(X.shape[0], X.shape[1] * 2)
 
     @staticmethod
