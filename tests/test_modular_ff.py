@@ -33,7 +33,7 @@ class TestUnitTests:
 
     def testComplementEncoder(self):
         X = np.array([[0.5, 0.2], [1, 0]])
-        Xt = ComplementEncoder.transform(X)
+        Xt = ComplementEncoder().fit_transform(X)
         assert np.array_equal(Xt, np.array([[0.5, 0.5, 0.2, 0.8], [1, 0, 0, 1]]))
         assert np.array_equal(ComplementEncoder.inverse_transform(Xt), X)
 

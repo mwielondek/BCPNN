@@ -48,8 +48,7 @@ class ComplementEncoder:
     x -> [x, 1-x]
     """
 
-    @staticmethod
-    def transform(X):
+    def fit_transform(self, X, y=None):
         """
         Transforms a vector of real values within the range (0, 1) onto complementary units form.
 
@@ -57,6 +56,9 @@ class ComplementEncoder:
         array([[0.5, 0.5, 0.2, 0.8]])
         """
         X = np.array(X)
+        n_features = X.shape[1]
+        n_classes = np.unique(y).size
+        self.module_sizes_ = np.hstack((np.full(n_features, 2), n_classes))
         return np.dstack((X, 1-X)).reshape(X.shape[0], X.shape[1] * 2)
 
     @staticmethod
