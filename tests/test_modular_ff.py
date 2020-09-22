@@ -118,6 +118,20 @@ class TestUnitTests:
             assert np.array_equal(clf.X_, X_pred)
             assert np.array_equal(clf.module_sizes, [2, 3, 1])
 
+        def testOneHotEncoder(self, clf):
+            X = np.array([[0, 1]])
+            y = np.array([0])
+            # default encoder is OneHotEncoder
+            clf.fit(X, y, transformX=True)
+            assert np.array_equal(clf.X_, np.array([[1, 0, 0, 1]]))
+            assert np.array_equal(clf.encoder.inverse_transform(clf.X_), X)
+
+        def testComplementEncoder(self):
+            clf = BCPNN(encoder='complement')
+            X = np.array([[0.4, 1]])
+            y = np.array([0])
+            clf.fit(X, y, transformX=True)
+            assert np.array_equal(clf.encoder.inverse_transform(clf.X_), X)
 
     class TestNormalization:
 

@@ -1,6 +1,6 @@
 import numpy as np
 from functools import reduce
-from .encoder import OneHotEncoder
+from .encoder import OneHotEncoder, ComplementEncoder
 
 class BCPNN:
     """
@@ -12,12 +12,15 @@ class BCPNN:
     @author: M. Wielondek
     """
 
-    def __init__(self, normalize=True, g=1):
+    def __init__(self, normalize=True, g=1, encoder='onehot'):
         # Whether to use threshold fn or normalize the output in transfer fn
         self.normalize = normalize
         # Controls number of clusters, as per "CLUSTERING OF STORED MEMORIES
         # IN AN ATTRACTOR NETWORK WITH LOCAL COMPETITION", A. Lansner, 2006.
         self.g = g
+        # Pick OneHotEncoder for discertely valued features, or ComplementEncoder
+        # for when the features are continous and represent probabilities.
+        self.encoder = {'onehot': OneHotEncoder(), 'complement': ComplementEncoder()}[encoder]
 
     def _transformX_enabled(fn):
         """Adds a transformX parameter and subsequent logic. Function needs to take X as first argument"""
@@ -52,7 +55,6 @@ class BCPNN:
         self.n_classes_ = self.classes_.shape[0]
 
         if transformX:
-            self.encoder = OneHotEncoder()
             X = self.encoder.fit_transform(X, self.classes_)
             module_sizes = self.encoder.module_sizes_
 
