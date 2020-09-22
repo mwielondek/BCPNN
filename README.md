@@ -11,3 +11,5 @@ Instantiate classifier, then `fit`, and `predict` or `predict_proba` for classif
 
 ## Dependencies
 Mainly numpy + sklearn for its OneHotEncoder, and pytest for running tests. Run `$ pip install -r requirements(_dev).txt` to install.
+
+![Denoising demo](denoising_demo.png?raw=true)
