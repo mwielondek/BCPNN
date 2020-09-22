@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 def count_unique_patterns(X, decimals=None):
     """Returns distinct pattern count, rounding up to `decimals`"""
@@ -120,3 +121,29 @@ def generate_synthetic_dataset(levels=3):
         prefixes = [idxstr[:a] for a in range(1,len(idxstr)+1)]
         out[i] = list(map(from_base3, prefixes))
     return out.astype(int) - ones
+
+### MNIST
+def dispmnist(x, ax=None, shape=(28,28)):
+    """Display MNIST figure"""
+    if ax is None:
+        ax = plt
+    ax.imshow(x.reshape(shape), cmap='gray_r')
+
+def dispcompare(x, y, title=None):
+    """Display MNIST vectors vertically stacked above each other"""
+    n_samples, _ = x.shape
+    fig, axs= plt.subplots(2, n_samples, figsize=(2*n_samples, 1.5*2))
+    if title:
+        fig.suptitle(title)
+    [axi.set_axis_off() for axi in axs.ravel()]
+    for i, row in enumerate(axs.T):
+        dispmnist(x[i], row[0])
+        dispmnist(y[i], row[1])
+
+def addsalt(X, prob=0.1):
+    """Add salt to pattern with `prob` probability by using the complement"""
+    xr = X.flatten()
+    for i,_ in enumerate(xr):
+        if np.random.choice([True, False], p=[prob, 1-prob]):
+            xr[i] = max(0.8, 1 - xr[i])
+    return xr.reshape(X.shape)
