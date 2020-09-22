@@ -1,6 +1,5 @@
 import numpy as np
 from .feedforward_modular import BCPNN as ffBCPNN
-from .encoder import OneHotEncoder
 
 class rmBCPNN(ffBCPNN):
     """ A recurrent version of the Bayesian Confidence
@@ -31,11 +30,9 @@ class rmBCPNN(ffBCPNN):
         n_samples, n_features = X.shape
 
         if transformX:
-            enc = OneHotEncoder()
-            X = enc.fit_transform(X)
-            mod_sz_X = enc.module_sizes_        # only for X
-            module_sizes = np.tile(mod_sz_X, 2) # so we tile them double for Y
-            self.encoder = enc
+            X = self.encoder.fit_transform(X)
+            mod_sz_X = self.encoder.module_sizes_        # only for X
+            module_sizes = np.tile(mod_sz_X, 2)          # so we tile them double for Y
 
         # correct module_sizes unless set manually; the default implementation sets one big output module
         if module_sizes is None:
