@@ -34,7 +34,9 @@ def collect_cluster_ids(clf, X, gvals, decimals=None, fit_params=None, predict_p
     n_gvals = len(gvals)
     clusters = np.empty((n_gvals, n_samples))
 
-    clf.fit(X, **fit_params)
+    # check if already fitted, otherwise fit
+    if not hasattr(clf, 'X_'):
+        clf.fit(X, **fit_params)
 
     for idx, g in enumerate(gvals):
         clf.g = g
