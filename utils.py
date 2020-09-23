@@ -36,16 +36,10 @@ def collect_cluster_ids(clf, X, gvals, decimals=None, fit_params=None, predict_p
 
     clf.fit(X, **fit_params)
 
-    clf.g = gvals[0]
-    pred = clf.predict(X, **predict_params)
-    clusters[0] = get_cluster_ids(pred, decimals=decimals)
-
-    for idx, g in list(enumerate(gvals))[1:]:
+    for idx, g in enumerate(gvals):
         clf.g = g
         pred = clf.predict(X, **predict_params)
-        prev = clusters[idx-1]
-        current = get_cluster_ids(pred, decimals=decimals)
-        clusters[idx] = current
+        clusters[idx] = get_cluster_ids(pred, decimals=decimals)
 
     return clusters.astype(int)
 
