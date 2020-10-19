@@ -1,11 +1,10 @@
 from sklearn.naive_bayes import MultinomialNB, BernoulliNB, GaussianNB
 from sklearn.model_selection import KFold, cross_val_score
-from sklearn.preprocessing import KBinsDiscretizer as KBD
+from sklearn.preprocessing import KBinsDiscretizer as KBD, StandardScaler
 
 from ..feedforward_modular import BCPNN as mBCPNN
 from ..feedforward import BCPNN
 
-import numpy as np
 
 from sklearn.pipeline import Pipeline
 
@@ -29,9 +28,11 @@ class Scorer:
             print("--- {:20} ---".format(k))
             print("Score: {:.3f} +/-{:.3f}".format(*v))
 
-    def score(self, clf, X, y, folds=4, seed=0, preprocess='none', **kwargs):
+    def score(self, clf, X, y, folds=4, seed=0, preprocess=(), **kwargs):
         estimators = []
-        if preprocess == 'discretize':
+        if 'scale' in preprocess:
+            estimators.append(('scaler', StandardScaler(with_std=True, with_mean=False)))
+        if 'discretize' in preprocess:
             estimators.append(('discretizer', KBD(5, encode='onehot-dense', strategy='uniform')))
         estimators.append(('clf', clf))
         pipe = Pipeline(estimators)
