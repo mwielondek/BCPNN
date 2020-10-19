@@ -1,12 +1,13 @@
 from sklearn.naive_bayes import MultinomialNB, BernoulliNB, GaussianNB
 from sklearn.model_selection import KFold, cross_val_score
-from sklearn.preprocessing import KBinsDiscretizer as KBD, StandardScaler
+from sklearn.preprocessing import KBinsDiscretizer as KBD, StandardScaler, OneHotEncoder
 
 from ..feedforward_modular import BCPNN as mBCPNN
 from ..feedforward import BCPNN
 
 
 from sklearn.pipeline import Pipeline
+from ..encoder import ComplementEncoder
 
 class Scorer:
 
@@ -28,14 +29,20 @@ class Scorer:
             print("--- {:20} ---".format(k))
             print("Score: {:.3f} +/-{:.3f}".format(*v))
 
-    def score(self, clf, X, y, folds=4, seed=0, preprocess=(), **kwargs):
+    def score(self, clf, X, y, folds=4, seed=0, preprocess=(), pipeline_params={}, **kwargs):
         estimators = []
+        if 'complement-encode' in preprocess:
+            estimators.append(('complement-encoder', ComplementEncoder()))
         if 'scale' in preprocess:
             estimators.append(('scaler', StandardScaler(with_std=True, with_mean=False)))
         if 'discretize' in preprocess:
-            estimators.append(('discretizer', KBD(5, encode='onehot-dense', strategy='uniform')))
+            estimators.append(('discretizer', KBD(5, encode='ordinal', strategy='uniform')))
+        if 'onehot-encode' in preprocess:
+            estimators.append(('onehot-encoder', OneHotEncoder(sparse=False)))
         estimators.append(('clf', clf))
+
         pipe = Pipeline(estimators)
+        pipe.set_params(**pipeline_params)
         kf = KFold(n_splits=folds, shuffle=True, random_state=seed)
         scores = cross_val_score(pipe, X, y, cv=kf)
         # std times two for a 95% confidence level
