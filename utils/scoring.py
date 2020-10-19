@@ -43,14 +43,12 @@ class Scorer:
         """Discretization (otherwise known as quantization or binning) provides a way
         to partition continuous features into discrete values."""
 
-        # discretize, n_bins determines number of bins per feature!
+        # n_bins determines number of bins per feature
         discretizer = KBD(n_bins, encode='onehot-dense', strategy=strategy)
 
-        # with warnings.catch_warnings():
-        #     warnings.simplefilter("ignore")
         Xb = discretizer.fit_transform(X)
 
-        return Xb#, discretizer
+        return Xb
 
 
 ## OLD BELOW
