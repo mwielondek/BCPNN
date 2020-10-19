@@ -7,6 +7,8 @@ from ..feedforward import BCPNN
 
 import numpy as np
 
+from sklearn.pipeline import Pipeline
+
 class Scorer:
 
     LIST_NB = [MultinomialNB(), BernoulliNB(), GaussianNB()]
@@ -28,20 +30,12 @@ class Scorer:
             print("Score: {:.3f} +/-{:.3f}".format(*v))
 
     def score(self, clf, X, y, folds=4, seed=0, preprocess='none', **kwargs):
+        estimators = []
         if preprocess == 'discretize':
-            X = self.discretize(X, **kwargs)
+            estimators.append(('discretizer', KBD(5, encode='onehot-dense', strategy='uniform')))
+        estimators.append(('clf', clf))
+        pipe = Pipeline(estimators)
         kf = KFold(n_splits=folds, shuffle=True, random_state=seed)
-        scores = cross_val_score(clf, X, y, cv=kf)
+        scores = cross_val_score(pipe, X, y, cv=kf)
         # std times two for a 95% confidence level
         return scores.mean(), scores.std() * 2
-
-    def discretize(self, X, n_bins=5, strategy='uniform'):
-        """Discretization (otherwise known as quantization or binning) provides a way
-        to partition continuous features into discrete values."""
-
-        # n_bins determines number of bins per feature
-        discretizer = KBD(n_bins, encode='onehot-dense', strategy=strategy)
-
-        Xb = discretizer.fit_transform(X)
-
-        return Xb
