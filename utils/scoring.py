@@ -6,16 +6,54 @@ import warnings
 
 from BCPNN.encoder import BinvecOneHotEncoder as Encoder
 
+from ..feedforward_modular import BCPNN as mBCPNN
+from ..feedforward import BCPNN
 
-def prepdata(X, n_bins):
-    # discretize, n_bins determines number of bins per feature!
-    discretizer = KBD(n_bins, encode='onehot-dense', strategy='uniform')
+import numpy as np
 
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        Xp = discretizer.fit_transform(X) #.reshape(X.shape[0], 2, -1)
+class Scorer:
 
-    return Xp, discretizer
+    LIST_NB = [MultinomialNB(), BernoulliNB(), GaussianNB()]
+    LIST_BCPNN = [BCPNN()]
+    LIST_CLFS = LIST_NB + LIST_BCPNN
+
+    def __init__(self, clfs=LIST_CLFS):
+        self.clfs = clfs
+
+    def score_all(self, X, y, **kwargs):
+        scores = {}
+        for clf in self.clfs:
+            scores[str(clf)] = self.score(clf, X, y, **kwargs)
+        return scores
+
+    def pretty_print(self, scores):
+        for k,v in scores.items():
+            print("--- {:20} ---".format(k))
+            print("Score: {:.3f} +/-{:.3f}".format(*v))
+
+    def score(self, clf, X, y, folds=4, seed=0, preprocess='none', **kwargs):
+        if preprocess == 'discretize':
+            X = self.discretize(X, **kwargs)
+        kf = KFold(n_splits=folds, shuffle=True, random_state=seed)
+        scores = cross_val_score(clf, X, y, cv=kf)
+        # std times two for a 95% confidence level
+        return scores.mean(), scores.std() * 2
+
+    def discretize(self, X, n_bins=5, strategy='uniform'):
+        """Discretization (otherwise known as quantization or binning) provides a way
+        to partition continuous features into discrete values."""
+
+        # discretize, n_bins determines number of bins per feature!
+        discretizer = KBD(n_bins, encode='onehot-dense', strategy=strategy)
+
+        # with warnings.catch_warnings():
+        #     warnings.simplefilter("ignore")
+        Xb = discretizer.fit_transform(X)
+
+        return Xb#, discretizer
+
+
+## OLD BELOW
 
 
 def score_clf_m(clf, X, y, n_bins=4, folds=4, seed=None, encode=False):
