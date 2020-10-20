@@ -15,7 +15,7 @@ class BCPNN:
     def __repr__(self):
         return "mffBCPNN()"
 
-    def __init__(self, normalize=True, g=1, encoder='onehot'):
+    def __init__(self, normalize=True, g=1, encoder='onehot', module_sizes_generator=None):
         # Whether to use threshold fn or normalize the output in transfer fn
         self.normalize = normalize
         # Controls number of clusters, as per "CLUSTERING OF STORED MEMORIES
@@ -24,6 +24,8 @@ class BCPNN:
         # Pick OneHotEncoder for discertely valued features, or ComplementEncoder
         # for when the features are continous and represent probabilities.
         self.encoder = {'onehot': OneHotEncoder(), 'complement': ComplementEncoder()}[encoder]
+        # An object that should implement get_module_sizes method
+        self.module_sizes_generator = module_sizes_generator
 
     def _transformX_enabled(fn):
         """Adds a transformX parameter and subsequent logic. Function needs to take X as first argument"""
@@ -65,8 +67,11 @@ class BCPNN:
         self.n_training_samples, self.n_features_ = X.shape
 
         if module_sizes is None:
-            # assume complementary units, ie module size 2 for all X modules
-            module_sizes = np.hstack((np.full(self.n_features_ // 2, 2), self.n_classes_))
+            if self.module_sizes_generator is not None:
+                module_sizes = self.module_sizes_generator.get_module_sizes()
+            else:
+                # assume complementary units, ie module size 2 for all X modules
+                module_sizes = np.hstack((np.full(self.n_features_ // 2, 2), self.n_classes_))
 
         assert module_sizes.sum() == self.n_features_ + self.n_classes_, "wrong dim of module_sizes"
         self.module_sizes = module_sizes
@@ -232,7 +237,7 @@ class BCPNN:
     """
     def get_params(self, deep=True):
         # BCPNN takes no init arguments
-        return {"normalize": self.normalize, "g": self.g}
+        return {"normalize": self.normalize, "g": self.g, "module_sizes_generator": self.module_sizes_generator}
 
     def set_params(self, **parameters):
         for parameter, value in parameters.items():

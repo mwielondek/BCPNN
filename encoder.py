@@ -81,8 +81,12 @@ class OneHotEncoder(skEncoder):
     """
     Uses sklearn's OneHotEncoder and returns module sizes for use with fit method. For use with discrete features.
     """
-    def __init__(self):
+    def __init__(self, module_sizes_=None):
+        self.module_sizes_ = module_sizes_
         return super().__init__(sparse=False, dtype='int')
+
+    def get_module_sizes(self):
+        return self.module_sizes_
 
     def fit(self, X, y=None):
         super().fit(X)
