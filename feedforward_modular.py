@@ -12,6 +12,9 @@ class BCPNN:
     @author: M. Wielondek
     """
 
+    def __repr__(self):
+        return "mffBCPNN()"
+
     def __init__(self, normalize=True, g=1, encoder='onehot'):
         # Whether to use threshold fn or normalize the output in transfer fn
         self.normalize = normalize
