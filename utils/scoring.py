@@ -54,8 +54,8 @@ class Scorer:
         pipe = self.create_pipeline(clf, **kwargs)
         return self.cv_score(pipe, X, y)
 
-    def cv_score(self, pipe, X, y, folds=4, seed=0, fp={}):
+    def cv_score(self, pipe, X, y, folds=4, seed=0, fit_params={}):
         kf = KFold(n_splits=folds, shuffle=True, random_state=seed)
-        scores = cross_val_score(pipe, X, y, cv=kf, fit_params=fp)
+        scores = cross_val_score(pipe, X, y, cv=kf, fit_params=fit_params)
         # std times two for a 95% confidence level
         return scores.mean(), scores.std() * 2

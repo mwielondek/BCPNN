@@ -15,7 +15,7 @@ class BCPNN:
     def __repr__(self):
         return "mffBCPNN()"
 
-    def __init__(self, normalize=True, g=1, encoder='onehot', module_sizes_generator=None):
+    def __init__(self, normalize=True, g=1, encoder='onehot'):
         # Whether to use threshold fn or normalize the output in transfer fn
         self.normalize = normalize
         # Controls number of clusters, as per "CLUSTERING OF STORED MEMORIES
@@ -24,8 +24,6 @@ class BCPNN:
         # Pick OneHotEncoder for discertely valued features, or ComplementEncoder
         # for when the features are continous and represent probabilities.
         self.encoder = {'onehot': OneHotEncoder(), 'complement': ComplementEncoder()}[encoder]
-        # An object that should implement get_module_sizes method
-        self.module_sizes_generator = module_sizes_generator
 
     def _transformX_enabled(fn):
         """Adds a transformX parameter and subsequent logic. Function needs to take X as first argument"""
@@ -67,11 +65,10 @@ class BCPNN:
         self.n_training_samples, self.n_features_ = X.shape
 
         if module_sizes is None:
-            if self.module_sizes_generator is not None:
-                module_sizes = self.module_sizes_generator.get_module_sizes()
-            else:
-                # assume complementary units, ie module size 2 for all X modules
-                module_sizes = np.hstack((np.full(self.n_features_ // 2, 2), self.n_classes_))
+            # assume complementary units, ie module size 2 for all X modules
+            module_sizes = np.hstack((np.full(self.n_features_ // 2, 2), self.n_classes_))
+        else:
+            module_sizes = self._get_value(module_sizes)
 
         assert module_sizes.sum() == self.n_features_ + self.n_classes_, "wrong dim of module_sizes"
         self.module_sizes = module_sizes
@@ -134,6 +131,10 @@ class BCPNN:
         """Classify and compare the predicted labels with y, returning
         the mean accuracy."""
         return (self.predict(X) == y).sum() / len(y)
+
+    def _get_value(self, val):
+        """Unpack value from function or return value as is if not callable"""
+        return val() if hasattr(val, '__call__') else val
 
     def _assert_module_normalization(self, X):
         """ Checks that the values in each module sum up to 1"""
@@ -237,7 +238,7 @@ class BCPNN:
     """
     def get_params(self, deep=True):
         # BCPNN takes no init arguments
-        return {"normalize": self.normalize, "g": self.g, "module_sizes_generator": self.module_sizes_generator}
+        return {"normalize": self.normalize, "g": self.g}
 
     def set_params(self, **parameters):
         for parameter, value in parameters.items():
