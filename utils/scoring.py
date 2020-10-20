@@ -51,8 +51,22 @@ class Scorer:
         return pipe
 
     def score_helper(self, clf, X, y, **kwargs):
-        pipe = self.create_pipeline(clf, **kwargs)
-        return self.cv_score(pipe, X, y)
+        pipeline_kwargs = {k.split('__', 1)[1]: v for k,v in kwargs.items() if k.split('__', 1)[0] == 'pipeline'}
+        cv_score_kwargs = {k.split('__', 1)[1]: v for k,v in kwargs.items() if k.split('__', 1)[0] == 'cv_score'}
+
+        pipe = self.create_pipeline(clf, **pipeline_kwargs)
+
+        # if OneHotEncoder is one of the steps we need to prerun the pipe due to how
+        # cross_val_score clones the estimators making us lose module_sizes_ attribute
+        if 'onehot-encode' in pipeline_kwargs.get('preprocess', ''):
+            pipe[:-1].fit(X,y)
+
+        if isinstance(clf, mBCPNN):
+            print("mbcpnn!")
+            modsz = lambda: pipe.named_steps['onehot-encoder'].module_sizes_
+            cv_score_kwargs.update(fit_params=dict(clf__module_sizes=modsz))
+
+        return self.cv_score(pipe, X, y, **cv_score_kwargs)
 
     def cv_score(self, pipe, X, y, folds=4, seed=0, fit_params={}):
         kf = KFold(n_splits=folds, shuffle=True, random_state=seed)
