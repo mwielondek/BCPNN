@@ -97,7 +97,6 @@ class BCPNN:
         if not assert_off:
             self._assert_module_normalization(X)
         beta = self.beta # of shape n_classes_
-        n_samples = X.shape[0]
         # split weights and input into modules
         x_modules = np.split(X, self.x_module_sections, axis=1)
         w_x_modules = zip(self.weight_modules, x_modules)
