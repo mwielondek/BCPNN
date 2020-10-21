@@ -28,9 +28,9 @@ class Scorer:
             modsz = None
             # if OneHotEncoder is one of the steps we need to prerun the pipe due to how
             # cross_val_score clones the estimators making us lose module_sizes_ attribute
-            if 'onehot-encoder' in pipe.named_steps.keys():
+            if 'onehot_encoder' in pipe.named_steps.keys():
                 pipe[:-1].fit(X,y)
-                modsz = lambda: pipe.named_steps['onehot-encoder'].module_sizes_
+                modsz = lambda: pipe.named_steps['onehot_encoder'].module_sizes_
 
             cv_score_kwargs.update(fit_params=dict(clf__module_sizes=modsz))
 
@@ -61,11 +61,11 @@ class Scorer:
         if 'discretize' in preprocess:
             estimators.append(('discretizer', KBD(n_bins=5, encode='ordinal', strategy='uniform')))
 
-        if 'onehot-encode' in preprocess:
-            estimators.append(('onehot-encoder', OneHotEncoder()))
+        if 'onehot_encode' in preprocess:
+            estimators.append(('onehot_encoder', OneHotEncoder()))
 
-        if 'complement-encode' in preprocess:
-            estimators.append(('complement-encoder', ComplementEncoder()))
+        if 'complement_encode' in preprocess:
+            estimators.append(('complement_encoder', ComplementEncoder()))
 
         estimators.append(('clf', clf))
 
