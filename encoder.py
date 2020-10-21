@@ -48,6 +48,9 @@ class ComplementEncoder:
     x -> [x, 1-x]
     """
 
+    def __repr__(self):
+        return "ComplementEncoder()"
+
     def fit(self, X, y=None):
         X = np.array(X)
         n_features = X.shape[1]
