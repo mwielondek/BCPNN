@@ -52,6 +52,7 @@ class Scorer:
         for k,v in scores.items():
             print("--- {:20} ---".format(k))
             print("Score: {:.3f} +/-{:.3f}".format(*v))
+        print("\n--> Best:", max(scores.items(), key=lambda x: x[1][0])[0])
 
     def create_pipeline(self, clf, preprocess=(), pipeline_params={}):
         estimators = []
