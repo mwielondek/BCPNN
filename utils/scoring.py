@@ -11,12 +11,36 @@ from ..encoder import ComplementEncoder, OneHotEncoder
 
 class Scorer:
 
-    LIST_NB = [MultinomialNB(), BernoulliNB(), GaussianNB()]
-    LIST_BCPNN = [BCPNN()]
-    LIST_CLFS = LIST_NB + LIST_BCPNN
+    def __init__(self, clfs_indices=None):
+        LIST_CLFS = self._get_clf_list()
+        if clfs_indices is not None:
+            select_clfs = list(map(LIST_CLFS.__getitem__, clfs_indices))
+            self.clfs = select_clfs
+        else:
+            self.clfs = LIST_CLFS
 
-    def __init__(self, clfs=LIST_CLFS):
-        self.clfs = clfs
+    def _get_clf_list(self):
+        patched_mbcpnn = mBCPNN()
+
+        def additional_setup(**kwargs):
+            X, y, pipe, cv_score_kwargs = list(map(kwargs.get, ['X', 'y', 'pipe', 'cv_score_kwargs']))
+
+            modsz = None
+            # if OneHotEncoder is one of the steps we need to prerun the pipe due to how
+            # cross_val_score clones the estimators making us lose module_sizes_ attribute
+            if 'onehot-encoder' in pipe.named_steps.keys():
+                pipe[:-1].fit(X,y)
+                modsz = lambda: pipe.named_steps['onehot-encoder'].module_sizes_
+
+            cv_score_kwargs.update(fit_params=dict(clf__module_sizes=modsz))
+
+        patched_mbcpnn.additional_setup = additional_setup
+
+        LIST_NB = [MultinomialNB(), BernoulliNB(), GaussianNB()]
+        LIST_BCPNN = [BCPNN(), patched_mbcpnn]
+        LIST_CLFS = LIST_NB + LIST_BCPNN
+
+        return LIST_CLFS
 
     def score_all(self, X, y, **kwargs):
         scores = {}
@@ -56,15 +80,11 @@ class Scorer:
 
         pipe = self.create_pipeline(clf, **pipeline_kwargs)
 
-        # if OneHotEncoder is one of the steps we need to prerun the pipe due to how
-        # cross_val_score clones the estimators making us lose module_sizes_ attribute
-        if 'onehot-encode' in pipeline_kwargs.get('preprocess', ''):
-            pipe[:-1].fit(X,y)
-
-        if isinstance(clf, mBCPNN):
-            print("mbcpnn!")
-            modsz = lambda: pipe.named_steps['onehot-encoder'].module_sizes_
-            cv_score_kwargs.update(fit_params=dict(clf__module_sizes=modsz))
+        # For special clf that need additional setup or fit params, like mBCPNN
+        try:
+            clf.additional_setup(X=X, y=y, pipe=pipe, cv_score_kwargs=cv_score_kwargs)
+        except AttributeError:
+            pass
 
         return self.cv_score(pipe, X, y, **cv_score_kwargs)
 
