@@ -1,5 +1,5 @@
 from sklearn.naive_bayes import MultinomialNB, BernoulliNB, GaussianNB
-from sklearn.model_selection import KFold, cross_val_score
+from sklearn.model_selection import StratifiedKFold, cross_val_score
 from sklearn.preprocessing import KBinsDiscretizer as KBD, MinMaxScaler
 
 from ..feedforward_modular import BCPNN as mBCPNN
@@ -123,7 +123,7 @@ class Scorer:
         return self.cv_score(pipe, X, y, **cv_score_kwargs)
 
     def cv_score(self, clf, X, y, folds=4, seed=0, fit_params={}):
-        kf = KFold(n_splits=folds, shuffle=True, random_state=seed)
+        kf = StratifiedKFold(n_splits=folds, shuffle=True, random_state=seed)
         scores = cross_val_score(clf, X, y, cv=kf, fit_params=fit_params)
         # std times two for a 95% confidence level
         return scores.mean(), scores.std() * 2
