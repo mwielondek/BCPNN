@@ -66,12 +66,26 @@ class Scorer:
                 kwargs['fit_params'] = kwfp_copy
         return scores
 
-    def pretty_print(self, scores):
+    def pretty_print(self, scores, mode='horizontal', print_best=False):
+        outputstr = ""
+        clfline = ""
+        scoreline = ""
+        tabs = "\t"*1
         for k,v in scores.items():
-            print("--- {:20} ---".format(k))
-            print("Score: {:.3f} +/-{:.3f}".format(*v))
+            clfstr = "--- {:17}".format(k)
+            scorestr = "Score: {:.3f} +/-{:.3f}".format(*v)
+            if mode == 'vertical':
+                outputstr += "{}\n{}\n".format(clfstr, scorestr)
+            elif mode == 'horizontal':
+                clfline += "{}{}".format(clfstr, tabs)
+                scoreline += "{}{}".format(scorestr, tabs)
 
-        print("\n--> Best:", max(scores.items(), key=lambda x: x[1][0])[0])
+        if mode == 'vertical':
+            print(outputstr)
+        elif mode == 'horizontal':
+            print("{}\n{}".format(clfline, scoreline))
+        if print_best:
+            print("\n--> Best:", max(scores.items(), key=lambda x: x[1][0])[0])
 
     def create_pipeline(self, clf, preprocess=(), pipeline_params={}):
         estimators = []
