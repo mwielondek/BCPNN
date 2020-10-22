@@ -92,8 +92,9 @@ class OneHotEncoder(skEncoder):
             # We want to transform it onto binary form, ie each feature should at least have two categories
             # (categories is a standard list of unequal element size, so we can't use numpy's array indexing)
             for i in np.where(np.array(mod_sz) == 1)[0]:
-                self.categories_[i] = np.array([0, 1])
-            mod_sz = list(map(len, (self.categories_)))
+                current = self.categories_[i][0]
+                self.categories_[i] = np.array([0, current])
+            mod_sz = np.array(list(map(len, (self.categories_))))
         # append y modules if given
         if y is not None:
             y_module_size = np.unique(y).size
