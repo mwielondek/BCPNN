@@ -1,6 +1,6 @@
 import numpy as np
 from functools import reduce
-from .encoder import OneHotEncoder, ComplementEncoder
+from encoder import OneHotEncoder, ComplementEncoder
 
 class BCPNN:
     """
@@ -67,6 +67,8 @@ class BCPNN:
         if module_sizes is None:
             # assume complementary units, ie module size 2 for all X modules
             module_sizes = np.hstack((np.full(self.n_features_ // 2, 2), self.n_classes_))
+        else:
+            module_sizes = self._get_value(module_sizes)
 
         assert module_sizes.sum() == self.n_features_ + self.n_classes_, "wrong dim of module_sizes"
         self.module_sizes = module_sizes
@@ -129,6 +131,10 @@ class BCPNN:
         """Classify and compare the predicted labels with y, returning
         the mean accuracy."""
         return (self.predict(X) == y).sum() / len(y)
+
+    def _get_value(self, val):
+        """Unpack value from function or return value as is if not callable"""
+        return val() if hasattr(val, '__call__') else val
 
     def _assert_module_normalization(self, X):
         """ Checks that the values in each module sum up to 1"""

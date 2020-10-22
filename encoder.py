@@ -48,6 +48,9 @@ class ComplementEncoder:
     x -> [x, 1-x]
     """
 
+    def __repr__(self):
+        return "ComplementEncoder()"
+
     def fit(self, X, y=None):
         X = np.array(X)
         n_features = X.shape[1]
@@ -81,8 +84,8 @@ class OneHotEncoder(skEncoder):
     """
     Uses sklearn's OneHotEncoder and returns module sizes for use with fit method. For use with discrete features.
     """
-    def __init__(self):
-        return super().__init__(sparse=False, dtype='int')
+    def __init__(self, handle_unknown='error'):
+        return super().__init__(sparse=False, dtype='int', handle_unknown=handle_unknown)
 
     def fit(self, X, y=None):
         super().fit(X)
