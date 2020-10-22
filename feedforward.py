@@ -116,7 +116,7 @@ class BCPNN:
         classes = set(y)
 
         # make sure each class is represented at least once 0,1,2,...
-        assert classes == set(range(max(y) + 1))
+        assert classes == set(range(max(y) + 1)), "classes need to be continuous and zero indexed"
 
         Y = np.zeros(tuple(map(lambda x: len(x), [y, classes])))
         for i, cls_idx in enumerate(y):
