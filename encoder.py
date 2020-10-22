@@ -84,8 +84,8 @@ class OneHotEncoder(skEncoder):
     """
     Uses sklearn's OneHotEncoder and returns module sizes for use with fit method. For use with discrete features.
     """
-    def __init__(self):
-        return super().__init__(sparse=False, dtype='int')
+    def __init__(self, handle_unknown='error'):
+        return super().__init__(sparse=False, dtype='int', handle_unknown=handle_unknown)
 
     def fit(self, X, y=None):
         super().fit(X)
@@ -96,7 +96,7 @@ class OneHotEncoder(skEncoder):
             # (categories is a standard list of unequal element size, so we can't use numpy's array indexing)
             for i in np.where(np.array(mod_sz) == 1)[0]:
                 self.categories_[i] = np.array([0, 1])
-            mod_sz = list(map(len, (self.categories_)))
+            mod_sz = np.array(list(map(len, (self.categories_))))
         # append y modules if given
         if y is not None:
             y_module_size = np.unique(y).size
