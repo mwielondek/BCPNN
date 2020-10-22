@@ -9,6 +9,10 @@ from ..feedforward import BCPNN
 from sklearn.pipeline import Pipeline
 from ..encoder import ComplementEncoder, OneHotEncoder
 
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning)
+# warnings.filterwarnings("ignore", category=RuntimeWarning)
+
 class Scorer:
 
     def __init__(self, clfs_indices=None):
@@ -42,16 +46,31 @@ class Scorer:
 
         return LIST_CLFS
 
-    def score_all(self, X, y, **kwargs):
+    def score_all(self, X, y, method='pipeline', **kwargs):
         scores = {}
         for clf in self.clfs:
-            scores[str(clf)] = self.score_helper(clf, X, y, **kwargs)
+            if method == 'pipeline':
+                f = self.score_pipeline
+                scores[str(clf)] = f(clf, X, y, **kwargs)
+            elif method == 'cv':
+                f = self.cv_score
+                # extract clf-specific fit_params
+                kwfp = kwargs['fit_params']
+                kwfp_copy = kwfp.copy()
+                clf_fit_params = {k.split('__', 1)[1]: v for k,v in kwfp.items() if k.split('__', 1)[0] == str(clf)[:-2]}
+                for k in list(kwfp.keys()):
+                    if '__' in k:
+                        del kwfp[k]
+                kwfp.update(clf_fit_params)
+                scores[str(clf)] = f(clf, X, y, **kwargs)
+                kwargs['fit_params'] = kwfp_copy
         return scores
 
     def pretty_print(self, scores):
         for k,v in scores.items():
             print("--- {:20} ---".format(k))
             print("Score: {:.3f} +/-{:.3f}".format(*v))
+
         print("\n--> Best:", max(scores.items(), key=lambda x: x[1][0])[0])
 
     def create_pipeline(self, clf, preprocess=(), pipeline_params={}):
@@ -75,7 +94,7 @@ class Scorer:
 
         return pipe
 
-    def score_helper(self, clf, X, y, **kwargs):
+    def score_pipeline(self, clf, X, y, **kwargs):
         pipeline_kwargs = {k.split('__', 1)[1]: v for k,v in kwargs.items() if k.split('__', 1)[0] == 'pipeline'}
         cv_score_kwargs = {k.split('__', 1)[1]: v for k,v in kwargs.items() if k.split('__', 1)[0] == 'cv_score'}
 
@@ -89,8 +108,8 @@ class Scorer:
 
         return self.cv_score(pipe, X, y, **cv_score_kwargs)
 
-    def cv_score(self, pipe, X, y, folds=4, seed=0, fit_params={}):
+    def cv_score(self, clf, X, y, folds=4, seed=0, fit_params={}):
         kf = KFold(n_splits=folds, shuffle=True, random_state=seed)
-        scores = cross_val_score(pipe, X, y, cv=kf, fit_params=fit_params)
+        scores = cross_val_score(clf, X, y, cv=kf, fit_params=fit_params)
         # std times two for a 95% confidence level
         return scores.mean(), scores.std() * 2
