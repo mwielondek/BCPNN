@@ -2,12 +2,12 @@ from sklearn.naive_bayes import MultinomialNB, BernoulliNB, GaussianNB
 from sklearn.model_selection import StratifiedKFold, cross_val_score
 from sklearn.preprocessing import KBinsDiscretizer as KBD, MinMaxScaler
 
-from ..feedforward_modular import BCPNN as mBCPNN
-from ..feedforward import BCPNN
+from BCPNN.feedforward_modular import BCPNN as mBCPNN
+from BCPNN.feedforward import BCPNN
 
 
 from sklearn.pipeline import Pipeline
-from ..encoder import ComplementEncoder, OneHotEncoder
+from BCPNN.encoder import ComplementEncoder, OneHotEncoder
 
 import warnings
 warnings.filterwarnings("ignore", category=UserWarning)
