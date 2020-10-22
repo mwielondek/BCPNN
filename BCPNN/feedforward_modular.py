@@ -1,6 +1,6 @@
 import numpy as np
 from functools import reduce
-from encoder import OneHotEncoder, ComplementEncoder
+from .encoder import OneHotEncoder, ComplementEncoder
 
 class BCPNN:
     """
