@@ -87,7 +87,7 @@ class BCPNN:
         self.y_pad = self.n_features_
 
         # Pre-calculate probability tables, beta, and weights
-        self.prob = np.array([self._get_prob(i) for i in range(self.n_classes_ + self.n_features_)])
+        self.prob = self.training_activations.sum(axis=0) / self.n_training_samples
         self.beta = np.array([self._get_beta(self.y_pad + j) for j in self.classes_])
 
         self.joint_prob = np.zeros((self.n_features_, self.n_classes_))
@@ -211,12 +211,6 @@ class BCPNN:
         if c == 0:
             return np.log(1 / (self.n_training_samples ** 2))
         return np.log(c)
-
-    def _get_prob(self, i):
-        # P(x_i)
-        # Check how many times x_i occured,
-        # divided by the number of samples
-        return self.training_activations[:, i].sum() / self.n_training_samples
 
     def _get_joint_prob(self, i, j):
         # P(x_i, x_j)
