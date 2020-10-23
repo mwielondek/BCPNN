@@ -86,13 +86,16 @@ class BCPNN:
         # Necessary padding into X to arrive at the y values
         self.y_pad = self.n_features_
 
-        # Pre-calculate beta and weights
+        # Pre-calculate probability tables, beta, and weights
+        self.prob = np.array([self._get_prob(i) for i in range(self.n_classes_ + self.n_features_)])
         self.beta = np.array([self._get_beta(self.y_pad + j) for j in self.classes_])
 
+        self.joint_prob = np.zeros((self.n_features_, self.n_classes_))
         self.weights = np.zeros((self.n_features_, self.n_classes_))
         for i in range(self.n_features_):
             for j in range(self.n_classes_):
-                self.weights[i][j] = self._get_weights(i, j + self.y_pad)
+                self.joint_prob[i][j] = self._get_joint_prob(i, j + self.y_pad)
+                self.weights[i][j] = self._get_weights(i, j)
         self.weight_modules = np.split(self.weights.T, self.x_module_sections, axis=1)
 
     @_transformX_enabled
@@ -203,7 +206,7 @@ class BCPNN:
 
     def _get_beta(self, i):
         # log( P(x_i) ) - the bias term
-        c = self._get_prob(i)
+        c = self.prob[i]
         # we deal with log(0) case, as per Holst 1997 (eq. 2.37)
         if c == 0:
             return np.log(1 / (self.n_training_samples ** 2))
@@ -223,8 +226,8 @@ class BCPNN:
 
     def _get_weights(self, i, j):
         # P(x_i, x_j) / ( P(x_i) x P(x_j) )
-        pi, pj = self._get_prob(i), self._get_prob(j)
-        pij = self._get_joint_prob(i, j)
+        pi, pj = self.prob[i], self.prob[j + self.y_pad]
+        pij = self.joint_prob[i][j]
         if pi == 0 or pj == 0:
             return 1
         # we deal with log(0) case, as per Holst 1997 (eq. 2.36)
