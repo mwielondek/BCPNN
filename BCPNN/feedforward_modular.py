@@ -87,14 +87,13 @@ class BCPNN:
         self.y_pad = self.n_features_
 
         # Pre-calculate probability tables, beta, and weights
+        self.joint_prob = np.dot(self.X_.T, self.Y_) / self.n_training_samples
         self.prob = self.training_activations.sum(axis=0) / self.n_training_samples
         self.beta = self._get_beta()
 
-        self.joint_prob = np.zeros((self.n_features_, self.n_classes_))
         self.weights = np.zeros((self.n_features_, self.n_classes_))
         for i in range(self.n_features_):
             for j in range(self.n_classes_):
-                self.joint_prob[i][j] = self._get_joint_prob(i, j + self.y_pad)
                 self.weights[i][j] = self._get_weights(i, j)
         self.weight_modules = np.split(self.weights.T, self.x_module_sections, axis=1)
 
@@ -216,12 +215,6 @@ class BCPNN:
             log_prob_classes = np.log(prob_classes)
 
         return np.where(prob_classes == 0, beta_zero, log_prob_classes)
-
-    def _get_joint_prob(self, i, j):
-        # P(x_i, x_j)
-        # Check how many times x_i occured together with x_j,
-        # divided by number of samples
-        return (self.training_activations[:, i] * self.training_activations[:, j]).sum() / self.n_training_samples
 
     def _get_weights(self, i, j):
         # P(x_i, x_j) / ( P(x_i) x P(x_j) )
