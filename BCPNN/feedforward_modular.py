@@ -88,7 +88,7 @@ class BCPNN:
 
         # Pre-calculate probability tables, beta, and weights
         self.prob = self.training_activations.sum(axis=0) / self.n_training_samples
-        self.beta = np.array([self._get_beta(self.y_pad + j) for j in self.classes_])
+        self.beta = self._get_beta()
 
         self.joint_prob = np.zeros((self.n_features_, self.n_classes_))
         self.weights = np.zeros((self.n_features_, self.n_classes_))
@@ -204,13 +204,18 @@ class BCPNN:
             Y[i][cls_idx] = 1
         return Y
 
-    def _get_beta(self, i):
+    def _get_beta(self):
         # log( P(x_i) ) - the bias term
-        c = self.prob[i]
+        prob_classes = self.prob[self.y_pad:]
+
         # we deal with log(0) case, as per Holst 1997 (eq. 2.37)
-        if c == 0:
-            return np.log(1 / (self.n_training_samples ** 2))
-        return np.log(c)
+        beta_zero = np.log(1 / (self.n_training_samples ** 2))
+
+        # we expect probabilities for some classes can be zero
+        with np.errstate(divide='ignore'):
+            log_prob_classes = np.log(prob_classes)
+
+        return np.where(prob_classes == 0, beta_zero, log_prob_classes)
 
     def _get_joint_prob(self, i, j):
         # P(x_i, x_j)
