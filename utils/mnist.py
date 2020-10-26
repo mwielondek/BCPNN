@@ -2,11 +2,15 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-def dispmnist(x, ax=None, shape=(28,28)):
+def dispmnist(x, ax=None):
     """Display MNIST figure"""
     if ax is None:
         ax = plt
-    ax.imshow(x.reshape(shape).astype(np.float32), cmap='gray_r')
+    if x.ndim == 1:
+        sqrt = x.shape[0] ** 0.5
+        shape = (int(sqrt),) * 2
+        x = x.reshape(shape)
+    ax.imshow(x.astype(np.float32), cmap='gray_r')
 
 def dispcompare(*vect, title=None, ylabels=None):
     """Display MNIST vectors vertically stacked above each other"""
