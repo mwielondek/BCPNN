@@ -96,20 +96,6 @@ class BCPNN:
         # Prepare weight modules to be multiplied with X modules during predict steps
         self.weight_modules = self._get_weight_modules()
 
-    def _get_weight_modules(self):
-        weight_modules = np.split(self.weights, self.x_module_sections, axis=0)
-        # Pad the modules to same size to be able to use the vectorized version of matmul
-        # dim: n_modules, n_features, max_module_size
-        return self._zero_padded(weight_modules, self.max_module_size, self.weights.shape[1])
-
-    @staticmethod
-    def _zero_padded(modules, row_sz, col_sz):
-        arr = np.zeros((len(modules), row_sz, col_sz))
-        for i, module in enumerate(modules):
-            rows, cols = module.shape
-            arr[i, :rows, :cols] = module
-        return arr
-
     @_transformX_enabled
     def predict_log_proba(self, X, assert_off=False):
         """Classify and return the log probabilities of each sample
@@ -230,6 +216,19 @@ class BCPNN:
         res[np.isnan(res)] = 1
         return res
 
+    def _get_weight_modules(self):
+        weight_modules = np.split(self.weights, self.x_module_sections, axis=0)
+        # Pad the modules to same size to be able to use the vectorized version of matmul
+        # dim: n_modules, n_features, max_module_size
+        return self._zero_padded(weight_modules, self.max_module_size, self.weights.shape[1])
+
+    @staticmethod
+    def _zero_padded(modules, row_sz, col_sz):
+        arr = np.zeros((len(modules), row_sz, col_sz))
+        for i, module in enumerate(modules):
+            rows, cols = module.shape
+            arr[i, :rows, :cols] = module
+        return arr
 
     """
      For compatibility with sklearn, below are
