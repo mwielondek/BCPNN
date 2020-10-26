@@ -179,13 +179,9 @@ class BCPNN:
 
         expsup = np.exp(support * self.g)
         # split returns views into existing array so we can work directly with expsup
-        # split using cumsum will always return one empty array, hence the :-1
         modules = np.split(expsup, self.y_module_sections, axis=1)
         for m in modules:
-            module_sz = m.shape[1]
-            # sum the module and tile appropriately to enable elementwise division
-            total = np.tile(m.sum(axis=1), (module_sz, 1)).T
-            m /= total
+            m /= m.sum(axis=1)[:,None]
         return expsup
 
     @staticmethod
