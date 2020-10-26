@@ -6,7 +6,7 @@ def dispmnist(x, ax=None, shape=(28,28)):
     """Display MNIST figure"""
     if ax is None:
         ax = plt
-    ax.imshow(x.reshape(shape), cmap='gray_r')
+    ax.imshow(x.reshape(shape).astype(np.float32), cmap='gray_r')
 
 def dispcompare(*vect, title=None, ylabels=None):
     """Display MNIST vectors vertically stacked above each other"""
