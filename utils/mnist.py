@@ -42,9 +42,11 @@ def addsalt(X, prob=0.1):
             xr[i] = max(0.8, 1 - xr[i])
     return xr.reshape(X.shape)
 
-def load_digits_784(return_X_y=True):
+def load_digits_784(return_X_y=True, res_factor=1):
     mnist = pd.read_csv('parent/../datasets/mnist_784.csv')
     y = mnist['class'].astype(np.int8)
     X = mnist.iloc[:,:-1]
     X = (X.values.astype(np.uint8) / 255).astype(np.float16)
+    if res_factor > 1:
+        X = X.reshape(X.shape[0], 28, 28)[:, ::res_factor, ::res_factor].reshape(X.shape[0], -1)
     return X,y if return_X_y else mnist
