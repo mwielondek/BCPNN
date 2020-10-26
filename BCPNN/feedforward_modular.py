@@ -78,6 +78,7 @@ class BCPNN:
         self._assert_module_normalization(self.X_)
         self.x_module_sections = np.cumsum(self.module_sizes[:-self.n_modules_y-1])
         self.y_module_sections = np.cumsum(self.module_sizes[-self.n_modules_y:-1])
+        self.max_module_size = max(self.module_sizes[:self.n_modules_x])
 
         # Extending X with y values allows us to work with
         # only one array throughout the code, enabling us to
@@ -91,7 +92,23 @@ class BCPNN:
         self.prob = self.training_activations.sum(axis=0) / self.n_training_samples
         self.beta = self._get_beta()
         self.weights = self._get_weights()
-        self.weight_modules = np.split(self.weights.T, self.x_module_sections, axis=1)
+
+        # Prepare weight modules to be multiplied with X modules during predict steps
+        self.weight_modules = self._get_weight_modules()
+
+    def _get_weight_modules(self):
+        weight_modules = np.split(self.weights, self.x_module_sections, axis=0)
+        # Pad the modules to same size to be able to use the vectorized version of matmul
+        # dim: n_modules, n_features, max_module_size
+        return self._zero_padded(weight_modules, self.max_module_size, self.weights.shape[1])
+
+    @staticmethod
+    def _zero_padded(modules, row_sz, col_sz):
+        arr = np.zeros((len(modules), row_sz, col_sz))
+        for i, module in enumerate(modules):
+            rows, cols = module.shape
+            arr[i, :rows, :cols] = module
+        return arr
 
     @_transformX_enabled
     def predict_log_proba(self, X, assert_off=False):
@@ -102,13 +119,9 @@ class BCPNN:
         beta = self.beta # of shape n_classes_
         # split weights and input into modules
         x_modules = np.split(X, self.x_module_sections, axis=1)
-        w_x_modules = zip(self.weight_modules, x_modules)
-        # reduce all modules onto a logged dot product of the weights and inputs
-        def f(acc, modules_w_x):
-            w, x = modules_w_x
-            wx = w.dot(x.T)
-            return acc + np.log(wx.T)
-        outer_sum = reduce(f, w_x_modules, 0)
+        x_modules = self._zero_padded(x_modules, X.shape[0], self.max_module_size)
+        outer_sum = np.matmul(x_modules, self.weight_modules)
+        outer_sum = np.log(outer_sum).sum(axis=0)
         return beta + outer_sum
 
     @_transformX_enabled
