@@ -90,11 +90,7 @@ class BCPNN:
         self.joint_prob = np.dot(self.X_.T, self.Y_) / self.n_training_samples
         self.prob = self.training_activations.sum(axis=0) / self.n_training_samples
         self.beta = self._get_beta()
-
-        self.weights = np.zeros((self.n_features_, self.n_classes_))
-        for i in range(self.n_features_):
-            for j in range(self.n_classes_):
-                self.weights[i][j] = self._get_weights(i, j)
+        self.weights = self._get_weights()
         self.weight_modules = np.split(self.weights.T, self.x_module_sections, axis=1)
 
     @_transformX_enabled
@@ -216,16 +212,15 @@ class BCPNN:
 
         return np.where(prob_classes == 0, beta_zero, log_prob_classes)
 
-    def _get_weights(self, i, j):
-        # P(x_i, x_j) / ( P(x_i) x P(x_j) )
-        pi, pj = self.prob[i], self.prob[j + self.y_pad]
-        pij = self.joint_prob[i][j]
-        if pi == 0 or pj == 0:
-            return 1
-        # we deal with log(0) case, as per Holst 1997 (eq. 2.36)
-        if pij == 0:
-            return 1 / self.n_training_samples
-        return pij / (pi * pj)
+    def _get_weights(self):
+        p_mult  = self.prob[:self.y_pad, None] * self.prob[self.y_pad:]
+        p_joint = np.where(self.joint_prob == 0, p_mult / self.n_training_samples, self.joint_prob)
+        p_mult  = np.where(p_mult == 0, p_joint, p_mult)
+        with np.errstate(divide='ignore', invalid='ignore'):
+            res = p_joint / p_mult
+        res[np.isnan(res)] = 1
+        return res
+
 
     """
      For compatibility with sklearn, below are
