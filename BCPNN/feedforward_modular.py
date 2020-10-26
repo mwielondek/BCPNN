@@ -64,21 +64,7 @@ class BCPNN:
         self.X_ = X
         self.n_training_samples, self.n_features_ = X.shape
 
-        if module_sizes is None:
-            # assume complementary units, ie module size 2 for all X modules
-            module_sizes = np.hstack((np.full(self.n_features_ // 2, 2), self.n_classes_))
-        else:
-            module_sizes = self._get_value(module_sizes)
-
-        assert module_sizes.sum() == self.n_features_ + self.n_classes_, "wrong dim of module_sizes"
-        self.module_sizes = module_sizes
-        # How many modules y consists of
-        self.n_modules_y = np.flatnonzero(np.cumsum(self.module_sizes[::-1]) == self.n_classes_)[0] + 1
-        self.n_modules_x = self.module_sizes.size - self.n_modules_y
-        self._assert_module_normalization(self.X_)
-        self.x_module_sections = np.cumsum(self.module_sizes[:-self.n_modules_y-1])
-        self.y_module_sections = np.cumsum(self.module_sizes[-self.n_modules_y:-1])
-        self.max_module_size = max(self.module_sizes[:self.n_modules_x])
+        self._setup_modules(module_sizes)
 
         # Extending X with y values allows us to work with
         # only one array throughout the code, enabling us to
@@ -128,6 +114,23 @@ class BCPNN:
         """Classify and compare the predicted labels with y, returning
         the mean accuracy."""
         return (self.predict(X) == y).sum() / len(y)
+
+    def _setup_modules(self, module_sizes):
+        if module_sizes is None:
+            # assume complementary units, ie module size 2 for all X modules
+            module_sizes = np.hstack((np.full(self.n_features_ // 2, 2), self.n_classes_))
+        else:
+            module_sizes = self._get_value(module_sizes)
+
+        assert module_sizes.sum() == self.n_features_ + self.n_classes_, "wrong dim of module_sizes"
+        self.module_sizes = module_sizes
+        # How many modules y consists of
+        self.n_modules_y = np.flatnonzero(np.cumsum(self.module_sizes[::-1]) == self.n_classes_)[0] + 1
+        self.n_modules_x = self.module_sizes.size - self.n_modules_y
+        self._assert_module_normalization(self.X_)
+        self.x_module_sections = np.cumsum(self.module_sizes[:-self.n_modules_y-1])
+        self.y_module_sections = np.cumsum(self.module_sizes[-self.n_modules_y:-1])
+        self.max_module_size = max(self.module_sizes[:self.n_modules_x])
 
     def _get_value(self, val):
         """Unpack value from function or return value as is if not callable"""
