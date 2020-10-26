@@ -1,3 +1,4 @@
+import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -36,3 +37,10 @@ def addsalt(X, prob=0.1):
         if np.random.choice([True, False], p=[prob, 1-prob]):
             xr[i] = max(0.8, 1 - xr[i])
     return xr.reshape(X.shape)
+
+def load_digits_784(return_X_y=True):
+    mnist = pd.read_csv('parent/../datasets/mnist_784.csv')
+    y = mnist['class'].astype(np.int8)
+    X = mnist.iloc[:,:-1]
+    X = (X.values.astype(np.uint8) / 255).astype(np.float16)
+    return X,y if return_X_y else mnist
