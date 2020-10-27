@@ -51,7 +51,7 @@ class ComplementEncoder:
     def __repr__(self):
         return "ComplementEncoder()"
 
-    def fit(self, X, y=None):
+    def fit(self, X, y=None, recurrent=False):
         X = np.array(X)
         n_features = X.shape[1]
         mod_sz = np.full(n_features, 2)
@@ -59,6 +59,8 @@ class ComplementEncoder:
         if y is not None:
             y_module_size = np.unique(y).size
             mod_sz = np.hstack((mod_sz, y_module_size))
+        elif recurrent:
+            mod_sz = np.tile(mod_sz, 2)
         self.module_sizes_ = mod_sz
         return self
 
@@ -72,8 +74,8 @@ class ComplementEncoder:
         X = np.array(X)
         return np.dstack((X, 1-X)).reshape(X.shape[0], X.shape[1] * 2)
 
-    def fit_transform(self, X, y=None):
-        self.fit(X, y)
+    def fit_transform(self, X, y=None, **kwargs):
+        self.fit(X, y, **kwargs)
         return self.transform(X)
 
     @staticmethod
@@ -87,7 +89,7 @@ class OneHotEncoder(skEncoder):
     def __init__(self, handle_unknown='error'):
         return super().__init__(sparse=False, dtype='int', handle_unknown=handle_unknown)
 
-    def fit(self, X, y=None):
+    def fit(self, X, y=None, recurrent=False):
         super().fit(X)
         mod_sz = list(map(len, (self.categories_)))
         if 1 in mod_sz:
@@ -102,5 +104,11 @@ class OneHotEncoder(skEncoder):
         if y is not None:
             y_module_size = np.unique(y).size
             mod_sz = np.hstack((mod_sz, y_module_size))
+        elif recurrent:
+            mod_sz = np.tile(mod_sz, 2)
         self.module_sizes_ = mod_sz
         return self
+
+    def fit_transform(self, X, y=None, **kwargs):
+        self.fit(X, y, **kwargs)
+        return self.transform(X)
