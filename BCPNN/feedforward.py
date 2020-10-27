@@ -13,13 +13,6 @@ class BCPNN:
     def __repr__(self):
         return "ffBCPNN()"
 
-    def __init__(self, normalize=True, g=1):
-        # Whether to use threshold fn or normalize the output in transfer fn
-        self.normalize = normalize
-        # Controls number of clusters, as per "CLUSTERING OF STORED MEMORIES
-        # IN AN ATTRACTOR NETWORK WITH LOCAL COMPETITION", A. Lansner, 2006.
-        self.g = g
-
     def fit(self, X, Y):
         """Where X is an array of samples and Y is either:
 
@@ -87,17 +80,7 @@ class BCPNN:
         # probability estimates larger than 1. To prevent this, one
         # alternative is to use a threshold in the transfer function
         # (Holst 1997, eq. 2.14)
-        if not self.normalize:
-            return np.exp(np.where(support > 0, 0, support))
-
-        # Or we can normalize the output over the hypercolumn (eq 2.15).
-        expsup = np.exp(support * self.g)
-        for sample_idx, sample in enumerate(expsup):
-            # DEBUG: remove assert in final version
-            sample_sum = sample.sum()
-            assert sample_sum > 0
-            expsup[sample_idx] /= sample_sum
-        return expsup
+        return np.exp(np.where(support > 0, 0, support))
 
     @staticmethod
     def _unique_labels(y):
@@ -161,7 +144,7 @@ class BCPNN:
     """
     def get_params(self, deep=True):
         # BCPNN takes no init arguments
-        return {"normalize": self.normalize, "g": self.g}
+        return {}
 
     def set_params(self, **parameters):
         for parameter, value in parameters.items():
