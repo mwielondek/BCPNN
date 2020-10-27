@@ -18,24 +18,8 @@ class rmBCPNN(ffBCPNN):
         self.PROB_THRESHOLD = prob_threshold
         self.VERBOSE = verbose
 
-    def _transformX_enabled(fn):
-        """Adds a transformX parameter and subsequent logic. Function needs to take X as first argument"""
-
-        def wrapper(self, X, *args, transformX=False, **kwargs):
-            if transformX:
-                # if X are not on the complement unit form
-                X = self.encoder.transform(X)
-            return fn(self, X, *args, **kwargs)
-
-        return wrapper
-
-    def fit(self, X, module_sizes=None, transformX=False):
+    def fit(self, X, module_sizes=None):
         n_samples, n_features = X.shape
-
-        if transformX:
-            X = self.encoder.fit_transform(X)
-            mod_sz_X = self.encoder.module_sizes_        # only for X
-            module_sizes = np.tile(mod_sz_X, 2)          # so we tile them double for Y
 
         # correct module_sizes unless set manually; the default implementation sets one big output module
         if module_sizes is None:
@@ -43,7 +27,6 @@ class rmBCPNN(ffBCPNN):
             module_sizes = np.full(n_features, 2)
         super().fit(X, X, module_sizes=module_sizes)
 
-    @_transformX_enabled
     def predict(self, X, return_binary=False):
         input = X
         prev = np.zeros_like(X)
@@ -59,7 +42,6 @@ class rmBCPNN(ffBCPNN):
             print("BCPNN: reached max iteration limit of ", self.MAX_ITER)
         return input
 
-    @_transformX_enabled
     def score(self, X, y, tol=0.5):
         """Returns the accuracy score for the classifier. Return value cosists
         of two averages; first counts correct number of separate features,

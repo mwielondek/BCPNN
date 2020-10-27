@@ -1,6 +1,5 @@
 import numpy as np
 from functools import reduce
-from .encoder import OneHotEncoder, ComplementEncoder
 
 class BCPNN:
     """
@@ -15,28 +14,14 @@ class BCPNN:
     def __repr__(self):
         return "mffBCPNN()"
 
-    def __init__(self, normalize=True, g=1, encoder='onehot'):
+    def __init__(self, normalize=True, g=1):
         # Whether to use threshold fn or normalize the output in transfer fn
         self.normalize = normalize
         # Controls number of clusters, as per "CLUSTERING OF STORED MEMORIES
         # IN AN ATTRACTOR NETWORK WITH LOCAL COMPETITION", A. Lansner, 2006.
         self.g = g
-        # Pick OneHotEncoder for discertely valued features, or ComplementEncoder
-        # for when the features are continous and represent probabilities.
-        self.encoder = {'onehot': OneHotEncoder(), 'complement': ComplementEncoder()}[encoder]
 
-    def _transformX_enabled(fn):
-        """Adds a transformX parameter and subsequent logic. Function needs to take X as first argument"""
-
-        def wrapper(self, X, *args, transformX=False, **kwargs):
-            if transformX:
-                # if X are not on the complement unit form
-                X = self.encoder.transform(X)
-            return fn(self, X, *args, **kwargs)
-
-        return wrapper
-
-    def fit(self, X, y, module_sizes=None, transformX=False):
+    def fit(self, X, y, module_sizes=None):
         """Where X is an array of samples and y is either:
 
         - an array of probabilities of respective sample belonging to each class
@@ -56,10 +41,6 @@ class BCPNN:
             self.Y_ = y
             self.classes_ = np.arange(y.shape[1])
         self.n_classes_ = self.classes_.shape[0]
-
-        if transformX:
-            X = self.encoder.fit_transform(X, self.classes_)
-            module_sizes = self.encoder.module_sizes_
 
         self.X_ = X
         self.n_training_samples, self.n_features_ = X.shape
@@ -82,7 +63,6 @@ class BCPNN:
         # Prepare weight modules to be multiplied with X modules during predict steps
         self.weight_modules = self._get_weight_modules()
 
-    @_transformX_enabled
     def predict_log_proba(self, X, assert_off=False):
         """Classify and return the log probabilities of each sample
         belonging to respective class."""
@@ -96,20 +76,17 @@ class BCPNN:
         outer_sum = np.log(outer_sum).sum(axis=0)
         return beta + outer_sum
 
-    @_transformX_enabled
     def predict_proba(self, X, **kwargs):
         """Classify and return the probabilities of each sample
         belonging to respective class."""
         return self._transfer_fn(self.predict_log_proba(X, **kwargs))
 
-    @_transformX_enabled
     def predict(self, X):
         """Classify and return the class index of each sample."""
         probabilities = self.predict_proba(X)
         max_probability_class = list(map(np.argmax, probabilities))
         return self.classes_[max_probability_class]
 
-    @_transformX_enabled
     def score(self, X, y):
         """Classify and compare the predicted labels with y, returning
         the mean accuracy."""
