@@ -52,3 +52,11 @@ class rmBCPNN(ffBCPNN):
 
     def _binarize(self, x, threshold=0.5):
         return np.where(x >= threshold, 1, 0)
+
+    def get_params(self, deep=True):
+        ff_params = super().get_params(deep)
+        r_params = {"prob_threshold": self.PROB_THRESHOLD,
+                    "verbose": self.VERBOSE,
+                    "tol": self.TOL,
+                    "max_iter": self.MAX_ITER}
+        return dict(**ff_params, **r_params)

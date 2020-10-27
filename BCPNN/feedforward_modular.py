@@ -214,7 +214,6 @@ class BCPNN:
      needed to conform to Estimator type.
     """
     def get_params(self, deep=True):
-        # BCPNN takes no init arguments
         return {"normalize": self.normalize, "g": self.g}
 
     def set_params(self, **parameters):
