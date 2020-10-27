@@ -77,7 +77,7 @@ class TestUnitTests:
         clf.fit(X, y)
         assert np.array_equal(clf.X_, X)
         assert np.array_equal(clf.module_sizes, [2, 1])
-        
+
     class TestNormalization:
 
         def testCheckNormalization1(self, clf):
@@ -129,6 +129,13 @@ class TestModule:
             predictions   = np.array([[np.log(1/4), 0], [0, np.log(1/4)]])
             module_sizes  = np.array([2, 2])
             predict_runner(train_pattern, targets, predictions, module_sizes, mode='log')
+
+        def testModuleSize2_2_predict(self):
+            train_pattern = np.array([[0, 1], [1, 0]])
+            targets       = np.array([[0, 1], [1, 0]])
+            predictions   = np.array([1, 0])
+            module_sizes  = np.array([2, 2])
+            predict_runner(train_pattern, targets, predictions, module_sizes, mode='predict')
 
         def testModuleSize2_2_proba_no_norm(self):
             train_pattern = np.array([[0, 1], [1, 0]])
@@ -232,6 +239,15 @@ class TestModule:
             module_sizes  = np.array([2, 2])
             predict_runner(train_pattern, targets, predictions, module_sizes, test_pattern=test_pattern, mode='log')
 
+        def testModuleSize2_2_predict(self):
+            train_pattern = np.array([[1, 0], [0, 1]])
+            targets       = np.array([[1, 0], [0, 1]])
+            test_pattern  = np.array([[1/2, 1/2], [2/3, 1/3]])
+            predictions   = np.array([[np.log(5/8), np.log(5/8)], [np.log(3/4), np.log(1/2)]])
+            predictions   = np.array([0, 0])
+            module_sizes  = np.array([2, 2])
+            predict_runner(train_pattern, targets, predictions, module_sizes, test_pattern=test_pattern, mode='predict')
+
         def testModuleSize2_2_single_log(self):
             train_pattern = np.array([[1, 0]])
             targets       = np.array([[1, 0]])
@@ -247,3 +263,12 @@ class TestModule:
             predictions   = np.array([[np.log(1/2), np.log(1/2)], [np.log(3/8), np.log(3/4)]])
             module_sizes  = np.array([3, 2])
             predict_runner(train_pattern, targets, predictions, module_sizes, test_pattern=test_pattern, mode='log')
+
+        def testModuleSize3_2_predict(self):
+            train_pattern = np.array([[1, 0, 0], [0, 1, 0]])
+            targets       = np.array([[1, 0], [0, 1]])
+            test_pattern  = np.array([[0, 0, 1], [0, 1/2, 1/2]])
+            predictions   = np.array([[np.log(1/2), np.log(1/2)], [np.log(3/8), np.log(3/4)]])
+            predictions   = np.array([0, 1])
+            module_sizes  = np.array([3, 2])
+            predict_runner(train_pattern, targets, predictions, module_sizes, test_pattern=test_pattern, mode='predict')

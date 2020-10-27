@@ -83,7 +83,7 @@ class BCPNN:
     def predict(self, X):
         """Classify and return the class index of each sample."""
         probabilities = self.predict_proba(X)
-        max_probability_class = list(map(np.argmax, probabilities))
+        max_probability_class = np.argmax(probabilities, axis=1)
         return self.classes_[max_probability_class]
 
     def score(self, X, y):
