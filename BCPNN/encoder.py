@@ -87,7 +87,7 @@ class OneHotEncoder(skEncoder):
     Uses sklearn's OneHotEncoder and returns module sizes for use with fit method. For use with discrete features.
     """
     def __init__(self, handle_unknown='error'):
-        return super().__init__(sparse=False, dtype='int', handle_unknown=handle_unknown)
+        return super().__init__(sparse=False, handle_unknown=handle_unknown)
 
     def fit(self, X, y=None, recurrent=False):
         super().fit(X)
@@ -112,3 +112,20 @@ class OneHotEncoder(skEncoder):
     def fit_transform(self, X, y=None, **kwargs):
         self.fit(X, y, **kwargs)
         return self.transform(X)
+
+    def transform(self, X, y=None, fix_unknown=True, **kwargs):
+        ret = super().transform(X)
+
+        if self.handle_unknown == 'ignore' and fix_unknown:
+            # unknown categories will be set to zero, which we need to change so the sum of
+            # all values equals one, as to fulfil the requirements of mBCPNN
+            split_sz = np.cumsum(list(map(len, self.categories_)))
+            splits = np.split(ret, split_sz, axis=1)[:-1]
+            for split in splits:
+                for sample in split:
+                    if sample.sum() == 0:
+                        c = 1/len(sample)
+                        for i, _ in enumerate(sample):
+                            sample[i] = c
+
+        return ret
