@@ -7,20 +7,20 @@ from ..clusters import get_cluster_ids
 
 class GridSearch:
 
-    def fit(self, clf, X, y, params, fit_params={}, verbose=False, scoring_fn=ami):
+    def fit(self, clf, X, y, params, fit_params={}, verbose=False, scoring_fn=ami, decimals=None):
         clf.fit(X, **fit_params)
         if verbose:
             print("Finished fitting")
 
         res = dict(params=[], score=[])
         params = ParameterGrid(params)
-        for param_set in params:
+        for i, param_set in enumerate(params):
             if verbose:
-                print("Predicting with params", param_set)
+                print("[{}/{}] Predicting with params {}".format(i+1, len(params), param_set))
             for k,v in param_set.items():
                 setattr(clf, k, v)
             pred = clf.predict(X)
-            clsid = get_cluster_ids(pred)
+            clsid = get_cluster_ids(pred, decimals=decimals)
             score = scoring_fn(clsid, y)
             res['params'].append(param_set)
             res['score'].append(score)
