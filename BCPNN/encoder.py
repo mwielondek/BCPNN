@@ -57,6 +57,8 @@ class ComplementEncoder:
         mod_sz = np.full(n_features, 2)
         # append y modules if given
         if y is not None:
+            if recurrent:
+                raise AttributeError("y values passed together with recurrent=True")
             y_module_size = np.unique(y).size
             mod_sz = np.hstack((mod_sz, y_module_size))
         elif recurrent:
