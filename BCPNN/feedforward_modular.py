@@ -1,6 +1,6 @@
 import numpy as np
 
-class BCPNN:
+class mBCPNN:
     """
     The Bayesian Confidence Propagation Neural Network (BCPNN)
 
@@ -11,7 +11,7 @@ class BCPNN:
     """
 
     def __repr__(self):
-        return "mffBCPNN()"
+        return "mBCPNN()"
 
     def __init__(self, normalize=True, g=1):
         # Whether to use threshold fn or normalize the output in transfer fn

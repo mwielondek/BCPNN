@@ -1,7 +1,7 @@
 import numpy as np
-from .feedforward_modular import BCPNN as ffBCPNN
+from .feedforward_modular import mBCPNN
 
-class rmBCPNN(ffBCPNN):
+class rmBCPNN(mBCPNN):
     """ A recurrent version of the Bayesian Confidence
     Propagation Neural Network (BCPNN).
 
@@ -9,7 +9,7 @@ class rmBCPNN(ffBCPNN):
     """
 
     def __repr__(self):
-        return "mrBCPNN()"
+        return "rmBCPNN()"
 
     def __init__(self, max_iter=1e3, tol=1e-4, prob_threshold=0.5, verbose=False, **kwargs):
         super().__init__(**kwargs)

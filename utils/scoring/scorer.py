@@ -2,7 +2,7 @@ from sklearn.naive_bayes import MultinomialNB, BernoulliNB, GaussianNB
 from sklearn.model_selection import StratifiedKFold, cross_val_score
 from sklearn.preprocessing import KBinsDiscretizer as KBD, MinMaxScaler
 
-from BCPNN.feedforward_modular import BCPNN as mBCPNN
+from BCPNN.feedforward_modular import mBCPNN
 from BCPNN.feedforward import BCPNN
 
 

@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 
-from BCPNN.feedforward_modular import BCPNN
+from BCPNN.feedforward_modular import mBCPNN as BCPNN
 from BCPNN.encoder import ComplementEncoder
 
 ## TEST UTILS

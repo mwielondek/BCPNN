@@ -76,7 +76,7 @@ def run_schema(schema, clfidx=None):
                 if callable(preprocess):
                     pprint("Preprocess fn: {}".format(preprocess.__name__))
                     Xt, y, modsz = preprocess(X, y)
-                    scores = sc.score_all(Xt, y, method='cv', fit_params=dict(mffBCPNN__module_sizes=modsz))
+                    scores = sc.score_all(Xt, y, method='cv', fit_params=dict(mBCPNN__module_sizes=modsz))
                 else:
                     pprint("Pipeline preprocess: {}".format(preprocess))
                     scores = sc.score_all(X, y, pipeline__preprocess=preprocess)
