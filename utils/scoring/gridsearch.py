@@ -20,7 +20,12 @@ class GridSearch:
             for k,v in param_set.items():
                 setattr(clf, k, v)
             pred = clf.predict(X)
-            clsid = get_cluster_ids(pred, decimals=decimals)
+            if isinstance(decimals, int):
+                calculated_decimals = decimals
+            else:
+                # set decimals to correlate with clf.tol
+                calculated_decimals = clf.TOL - 1
+            clsid = get_cluster_ids(pred, decimals=calculated_decimals)
             score = scoring_fn(clsid, y)
             res['params'].append(param_set)
             res['score'].append(score)
