@@ -28,6 +28,7 @@ def predict_runner(train_pattern, targets, predictions, module_sizes,
     # NOTE: below form easier to debug
     # assert (output == predictions).all()
     assert np.allclose(output, predictions, atol=atol)
+    assert (clf.weights != 0).all()
 
 class TestUnitTests:
 

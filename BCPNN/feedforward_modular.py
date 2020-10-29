@@ -58,6 +58,8 @@ class mBCPNN:
         self.prob = self.training_activations.sum(axis=0) / self.n_training_samples
         self.beta = self._get_beta()
         self.weights = self._get_weights()
+        assert (self.weights != 0).all(), ("all weights should be strictly non zero; try increasing "
+        + "floating precision of your input data")
 
         # Prepare weight modules to be multiplied with X modules during predict steps
         self.weight_modules = self._get_weight_modules()
