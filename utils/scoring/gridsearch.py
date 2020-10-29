@@ -7,6 +7,8 @@ from ..clusters import get_cluster_ids
 
 class GridSearch:
 
+    decimals_key = '__decimals'
+
     def fit(self, clf, X, y, params, fit_params={}, verbose=False, scoring_fn=ami, decimals=None):
         clf.fit(X, **fit_params)
         if verbose:
@@ -18,10 +20,14 @@ class GridSearch:
             if verbose:
                 print("[{}/{}] Predicting with params {}".format(i+1, len(params), param_set))
             for k,v in param_set.items():
+                if k == self.decimals_key:
+                    continue
                 setattr(clf, k, v)
             pred = clf.predict(X)
             if isinstance(decimals, int):
                 calculated_decimals = decimals
+            elif self.decimals_key in param_set.keys():
+                calculated_decimals = param_set[self.decimals_key]
             else:
                 # set decimals to correlate with clf.tol
                 calculated_decimals = clf.TOL - 1
