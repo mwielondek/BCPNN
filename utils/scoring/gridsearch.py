@@ -38,5 +38,9 @@ class GridSearch:
 
         self.res_ = res
 
-    def disp_res(self):
+    def get_res(self):
         return pd.DataFrame(self.res_).sort_values('score', ascending=False)
+
+    def disp_res(self):
+        with pd.option_context('display.max_colwidth', None, 'display.float_format', '{:.2%}'.format):
+            display(self.get_res())
