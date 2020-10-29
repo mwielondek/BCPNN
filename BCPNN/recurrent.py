@@ -11,7 +11,7 @@ class rBCPNN(ffBCPNN):
     def __repr__(self):
         return "rBCPNN()"
 
-    def __init__(self, max_iter=1e3, tol=1e-4, prob_threshold=0.5, verbose=False, **kwargs):
+    def __init__(self, max_iter=1e3, tol=1e-5, prob_threshold=0.5, verbose=False, **kwargs):
         super().__init__(**kwargs)
         self.MAX_ITER = max_iter
         self.TOL = tol
