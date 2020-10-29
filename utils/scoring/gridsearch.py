@@ -9,7 +9,7 @@ class GridSearch:
 
     decimals_key = '__decimals'
 
-    def fit(self, clf, X, y, params, fit_params={}, verbose=False, scoring_fn=ami, decimals=None):
+    def fit(self, clf, X, y, params, fit_params={}, verbose=False, scoring_fn=ami, decimals=3):
         clf.fit(X, **fit_params)
         if verbose:
             print("Finished fitting")
