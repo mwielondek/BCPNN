@@ -1,20 +1,21 @@
 import numpy as np
 
-def count_unique_patterns(X, decimals=None):
-    """Returns distinct pattern count, rounding up to `decimals`"""
-    if decimals:
-        X = X.round(decimals=decimals)
-    return np.unique(X, axis=0).shape[0]
+def get_unique_patterns(X):
+    """Returns distinct pattern count"""
+    return np.unique(X, axis=0)
+
+def round_patterns(X, decimals):
+    """Truncates patterns to `decimals`"""
+    return np.trunc(X*10**decimals)/(10**decimals)
 
 def get_cluster_arrays(X, oneindexed=False, decimals=None):
     """Returns an array of clusters, where each value corresponds to sample ID"""
     clusters = {}
-    if decimals:
-        X = X.round(decimals=decimals)
-    for pat in np.unique(X, axis=0):
-        clusters[pat.tostring()] = []
-    for idx,pat in enumerate(X):
-        clusters[pat.tostring()].append(idx + oneindexed)
+    rounded = round_patterns(X, decimals)
+    for pat in get_unique_patterns(rounded):
+        clusters[pat.tobytes()] = []
+    for idx,pat in enumerate(rounded):
+        clusters[pat.tobytes()].append(idx + oneindexed)
     return list(clusters.values())
 
 def get_cluster_ids(X, decimals=2):
