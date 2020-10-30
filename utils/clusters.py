@@ -4,9 +4,12 @@ def get_unique_patterns(X):
     """Returns distinct pattern count"""
     return np.unique(X, axis=0)
 
-def round_patterns(X, decimals):
-    """Truncates patterns to `decimals`"""
-    return np.trunc(X*10**decimals)/(10**decimals)
+def round_patterns(X, decimals, mode='truncate'):
+    """Truncates (or rounds) patterns to `decimals`"""
+    if mode == 'truncate':
+        return np.trunc(X*10**decimals)/(10**decimals)
+    elif mode == 'round':
+        return X.round(decimals=decimals)
 
 def get_cluster_arrays(X, oneindexed=False, decimals=None):
     """Returns an array of clusters, where each value corresponds to sample ID"""
