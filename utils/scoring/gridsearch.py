@@ -10,15 +10,17 @@ class GridSearch:
     decimals_key = '__decimals'
     mode_key = '__mode'
 
-    def fit(self, clf, X, y, params, fit_params={}, verbose=False, scoring_fn=ami, decimals=None):
+    def fit(self, clf, X, y, params, fit_params={}, verbose=0, scoring_fn=ami, decimals=None):
+        if verbose > 0:
+            print("Fitting...")
         clf.fit(X, **fit_params)
-        if verbose:
-            print("Finished fitting")
 
+        if verbose > 0:
+            print("Predicting...")
         res = dict(params=[], score=[])
         params = ParameterGrid(params)
         for i, param_set in enumerate(params):
-            if verbose:
+            if verbose > 1:
                 print("[{}/{}] Predicting with params {}".format(i+1, len(params), param_set))
             for k,v in param_set.items():
                 if k in [self.decimals_key, self.mode_key]:
