@@ -6,34 +6,7 @@ from sklearn import datasets
 import warnings
 
 from . import Scorer
-
-def load_zoo(mode='all'):
-    path = '../../datasets/zoo-animal-classification/'
-    zoo = pd.read_csv(path+'zoo.csv')
-    zoo
-
-    # remove class type (target) and name
-    X_df = zoo.drop(['animal_name', 'class_type'], axis=1)
-
-    if mode == 'binary':
-        # remove class type and legs to only keep binary attributes
-        X_df = X_df.drop(['legs'], axis=1)
-
-    X = X_df.values
-
-    y = zoo['class_type'].to_numpy() - 1 # to make it zero indexed
-
-    return X, y
-
-def load_mushrooms():
-    path = '../../datasets/mushrooms/'
-    shrooms = pd.read_csv(path+'agaricus-lepiota.data', header=0, names=np.arange(23)).astype(str)
-    X_df = shrooms.drop(columns=0)
-    X = X_df.values
-    y = shrooms[0].to_numpy()
-    # encode labels onto 0,1
-    y = np.where(y=='e', 0, 1)
-    return X, y
+from ..data import load_digits_784, load_mushrooms, load_zoo
 
 ## Preprocess fns
 

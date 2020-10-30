@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 
 def transform_patterns(patterns):
     """One hot encode patterns, ie [[0,1,2]] -> [[1, 0, 0, 0, 1, 0, 0, 0, 1]]"""
@@ -46,3 +47,40 @@ def generate_synthetic_dataset(levels=3):
         prefixes = [idxstr[:a] for a in range(1,len(idxstr)+1)]
         out[i] = list(map(from_base3, prefixes))
     return out.astype(int) - ones
+
+def load_zoo(mode='all'):
+    path = '../../datasets/zoo-animal-classification/'
+    zoo = pd.read_csv(path+'zoo.csv')
+    zoo
+
+    # remove class type (target) and name
+    X_df = zoo.drop(['animal_name', 'class_type'], axis=1)
+
+    if mode == 'binary':
+        # remove class type and legs to only keep binary attributes
+        X_df = X_df.drop(['legs'], axis=1)
+
+    X = X_df.values
+
+    y = zoo['class_type'].to_numpy() - 1 # to make it zero indexed
+
+    return X, y
+
+def load_mushrooms():
+    path = '../../datasets/mushrooms/'
+    shrooms = pd.read_csv(path+'agaricus-lepiota.data', header=0, names=np.arange(23)).astype(str)
+    X_df = shrooms.drop(columns=0)
+    X = X_df.values
+    y = shrooms[0].to_numpy()
+    # encode labels onto 0,1
+    y = np.where(y=='e', 0, 1)
+    return X, y
+
+def load_digits_784(return_X_y=True, res_factor=1):
+    mnist = pd.read_csv('parent/../datasets/mnist_784.csv')
+    y = mnist['class'].astype(np.int8)
+    X = mnist.iloc[:,:-1]
+    X = (X.values.astype(np.uint8) / 255).astype(np.float32)
+    if res_factor > 1:
+        X = X.reshape(X.shape[0], 28, 28)[:, ::res_factor, ::res_factor].reshape(X.shape[0], -1)
+    return X,y if return_X_y else mnist
