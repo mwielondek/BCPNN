@@ -17,7 +17,7 @@ def get_cluster_arrays(X, oneindexed=False, decimals=None):
         clusters[pat.tostring()].append(idx + oneindexed)
     return list(clusters.values())
 
-def get_cluster_ids(X, decimals=None):
+def get_cluster_ids(X, decimals=2):
     """Returns an array of cluster IDs, where the index corresponds to sample ID"""
     n_samples, _ = X.shape
     clusters = get_cluster_arrays(X, False, decimals)
@@ -27,7 +27,7 @@ def get_cluster_ids(X, decimals=None):
             arr[sample] = cidx
     return arr
 
-def collect_cluster_ids(clf, X, gvals, decimals=None, fit_params=None, predict_params=None):
+def collect_cluster_ids(clf, X, gvals, decimals=2, fit_params=None, predict_params=None):
     """Get cluster IDs as a function of g values"""
     n_samples, _ = X.shape
     n_gvals = len(gvals)
@@ -36,6 +36,10 @@ def collect_cluster_ids(clf, X, gvals, decimals=None, fit_params=None, predict_p
     # check if already fitted, otherwise fit
     if not hasattr(clf, 'X_'):
         clf.fit(X, **fit_params)
+
+    if decimals <= 0:
+        # default to a precision of `decimals` less SF than clf.TOL
+        decimals =  int(np.log10(clf.TOL) * -1) + decimals
 
     for idx, g in enumerate(gvals):
         clf.g = g
