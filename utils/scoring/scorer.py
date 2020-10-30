@@ -20,13 +20,17 @@ class Scorer:
         def __init__(self, modsz=None):
             self.modsz = modsz
 
-    class PatchedOneHotEncoder(OneHotEncoder):
-        store = None
+    @staticmethod
+    def create_patched_encoder(encoder):
+        class PatchedEncoder(encoder):
+            store = None
 
-        def fit(self, *args, **kwargs):
-            super().fit(*args, **kwargs)
-            self.store.modsz = self.module_sizes_
-            return self
+            def fit(self, *args, **kwargs):
+                super().fit(*args, **kwargs)
+                self.store.modsz = self.module_sizes_
+                return self
+
+        return PatchedEncoder
 
     class PatchedBCPNN(mBCPNN):
         store = None
@@ -52,7 +56,10 @@ class Scorer:
 
         self.store = self.ModuleSizesStore()
         self.PatchedBCPNN.store = self.store
+        self.PatchedOneHotEncoder = self.create_patched_encoder(OneHotEncoder)
+        self.PatchedComplementEncoder = self.create_patched_encoder(ComplementEncoder)
         self.PatchedOneHotEncoder.store = self.store
+        self.PatchedComplementEncoder.store = self.store
 
     def _get_clf_list(self):
         LIST_NB = [MultinomialNB(), BernoulliNB(), GaussianNB()]
@@ -114,7 +121,7 @@ class Scorer:
             estimators.append(('onehot_encoder', self.PatchedOneHotEncoder()))
 
         if 'complement_encode' in preprocess:
-            estimators.append(('complement_encoder', ComplementEncoder()))
+            estimators.append(('complement_encoder', self.PatchedComplementEncoder()))
 
         estimators.append(('clf', clf))
 
