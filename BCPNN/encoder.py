@@ -55,14 +55,15 @@ class ComplementEncoder:
         X = np.array(X)
         n_features = X.shape[1]
         mod_sz = np.full(n_features, 2)
-        # append y modules if given
-        if y is not None:
-            if recurrent:
-                raise AttributeError("y values passed together with recurrent=True")
+
+        if recurrent:
+            mod_sz = np.tile(mod_sz, 2)
+
+        elif y is not None:
+            # append y modules if given
             y_module_size = np.unique(y).size
             mod_sz = np.hstack((mod_sz, y_module_size))
-        elif recurrent:
-            mod_sz = np.tile(mod_sz, 2)
+
         self.module_sizes_ = mod_sz
         return self
 
@@ -102,14 +103,15 @@ class OneHotEncoder(skEncoder):
                 current = self.categories_[i][0]
                 self.categories_[i] = np.array([0, current])
             mod_sz = np.array(list(map(len, (self.categories_))))
-        # append y modules if given
-        if y is not None:
-            if recurrent:
-                raise AttributeError("y values passed together with recurrent=True")
+
+        if recurrent:
+            mod_sz = np.tile(mod_sz, 2)
+
+        elif y is not None:
+            # append y modules if given
             y_module_size = np.unique(y).size
             mod_sz = np.hstack((mod_sz, y_module_size))
-        elif recurrent:
-            mod_sz = np.tile(mod_sz, 2)
+
         self.module_sizes_ = mod_sz
         return self
 
