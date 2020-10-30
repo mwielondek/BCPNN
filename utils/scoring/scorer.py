@@ -31,11 +31,15 @@ class Scorer:
     class PatchedBCPNN(mBCPNN):
         store = None
 
-        def __repr__(self):
+        def __str__(self):
             return "Patched mBCPNN()"
 
+        def __repr__(self):
+            return "pmBCPNN()"
+
         def fit(self, *args, **kwargs):
-            kwargs.update(module_sizes=self.store.modsz)
+            if not 'module_sizes' in kwargs.keys():
+                kwargs.update(module_sizes=self.store.modsz)
             return super().fit(*args, **kwargs)
 
     def __init__(self, clfs_indices=None):
@@ -68,7 +72,7 @@ class Scorer:
                 # extract clf-specific fit_params
                 kwfp = kwargs['fit_params']
                 kwfp_copy = kwfp.copy()
-                clf_fit_params = {k.split('__', 1)[1]: v for k,v in kwfp.items() if k.split('__', 1)[0] == str(clf)[:-2]}
+                clf_fit_params = {k.split('__', 1)[1]: v for k,v in kwfp.items() if k.split('__', 1)[0] == repr(clf)[:-2]}
                 for k in list(kwfp.keys()):
                     if '__' in k:
                         del kwfp[k]
