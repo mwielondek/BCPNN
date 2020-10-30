@@ -11,27 +11,27 @@ def round_patterns(X, decimals, mode='truncate'):
     elif mode == 'round':
         return X.round(decimals=decimals)
 
-def get_cluster_arrays(X, oneindexed=False, decimals=None):
+def get_cluster_arrays(X, oneindexed=False, decimals=None, **kwargs):
     """Returns an array of clusters, where each value corresponds to sample ID"""
     clusters = {}
-    rounded = round_patterns(X, decimals)
+    rounded = round_patterns(X, decimals, **kwargs)
     for pat in get_unique_patterns(rounded):
         clusters[pat.tobytes()] = []
     for idx,pat in enumerate(rounded):
         clusters[pat.tobytes()].append(idx + oneindexed)
     return list(clusters.values())
 
-def get_cluster_ids(X, decimals=2):
+def get_cluster_ids(X, decimals=2, **kwargs):
     """Returns an array of cluster IDs, where the index corresponds to sample ID"""
     n_samples, _ = X.shape
-    clusters = get_cluster_arrays(X, False, decimals)
+    clusters = get_cluster_arrays(X, False, decimals, **kwargs)
     arr = np.zeros(n_samples).astype(int)
     for cidx, c in enumerate(clusters):
         for sample in c:
             arr[sample] = cidx
     return arr
 
-def collect_cluster_ids(clf, X, gvals, decimals=2, fit_params=None, predict_params=None):
+def collect_cluster_ids(clf, X, gvals, decimals=2, fit_params=None, predict_params=None, **kwargs):
     """Get cluster IDs as a function of g values"""
     n_samples, _ = X.shape
     n_gvals = len(gvals)
@@ -48,7 +48,7 @@ def collect_cluster_ids(clf, X, gvals, decimals=2, fit_params=None, predict_para
     for idx, g in enumerate(gvals):
         clf.g = g
         pred = clf.predict(X, **predict_params)
-        clusters[idx] = get_cluster_ids(pred, decimals=decimals)
+        clusters[idx] = get_cluster_ids(pred, decimals=decimals, **kwargs)
 
     return clusters.astype(int)
 
