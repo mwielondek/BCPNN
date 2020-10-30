@@ -116,3 +116,9 @@ def load_digits_64(transform=False, recurrent=False):
         return X, y, enc.module_sizes_
 
     return X,y
+
+def stratified_split(X, y, n=10):
+    """Return a subset of X and y with n samples of each class"""
+    classes = np.unique(y)
+    idx = np.array([np.flatnonzero(y == cls)[:n] for cls in classes]).ravel()
+    return X[idx], y[idx]
