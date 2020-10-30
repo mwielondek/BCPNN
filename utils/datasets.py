@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import warnings
 
 from sklearn.datasets import load_digits
 
@@ -119,6 +120,11 @@ def load_digits_64(transform=False, recurrent=False):
 
 def stratified_split(X, y, n=10):
     """Return a subset of X and y with n samples of each class"""
-    classes = np.unique(y)
+    classes, counts = np.unique(y, return_counts=True)
+    min_samples = counts.min()
+    if min_samples < n:
+        warnings.warn(("At least one class consists of only {} samples. Adjusting n for uniform"
+        + " percentage of samples for each class.").format(min_samples))
+        n = min_samples
     idx = np.array([np.flatnonzero(y == cls)[:n] for cls in classes]).ravel()
     return X[idx], y[idx]
