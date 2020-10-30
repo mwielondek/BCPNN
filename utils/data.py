@@ -1,6 +1,10 @@
 import numpy as np
 import pandas as pd
 
+from sklearn.datasets import load_digits
+
+from ..BCPNN.encoder import ComplementEncoder, OneHotEncoder
+
 def transform_patterns(patterns):
     """One hot encode patterns, ie [[0,1,2]] -> [[1, 0, 0, 0, 1, 0, 0, 0, 1]]"""
     n_features = patterns.shape[1]
@@ -48,7 +52,7 @@ def generate_synthetic_dataset(levels=3):
         out[i] = list(map(from_base3, prefixes))
     return out.astype(int) - ones
 
-def load_zoo(mode='all'):
+def load_zoo(mode='all', transform=False, recurrent=False):
     path = '../../datasets/zoo-animal-classification/'
     zoo = pd.read_csv(path+'zoo.csv')
     zoo
@@ -64,9 +68,14 @@ def load_zoo(mode='all'):
 
     y = zoo['class_type'].to_numpy() - 1 # to make it zero indexed
 
+    if transform:
+        enc = OneHotEncoder()
+        X = enc.fit_transform(X, y, recurrent=recurrent)
+        return X, y, enc.module_sizes_
+
     return X, y
 
-def load_mushrooms():
+def load_mushrooms(transform=False, recurrent=False):
     path = '../../datasets/mushrooms/'
     shrooms = pd.read_csv(path+'agaricus-lepiota.data', header=0, names=np.arange(23)).astype(str)
     X_df = shrooms.drop(columns=0)
@@ -74,13 +83,36 @@ def load_mushrooms():
     y = shrooms[0].to_numpy()
     # encode labels onto 0,1
     y = np.where(y=='e', 0, 1)
+
+    if transform:
+        enc = OneHotEncoder()
+        X = enc.fit_transform(X, y, recurrent=recurrent)
+        return X, y, enc.module_sizes_
+
     return X, y
 
-def load_digits_784(return_X_y=True, res_factor=1):
+def load_digits_784(res_factor=1, transform=False, recurrent=False):
     mnist = pd.read_csv('parent/../datasets/mnist_784.csv')
     y = mnist['class'].astype(np.int8)
     X = mnist.iloc[:,:-1]
     X = (X.values.astype(np.uint8) / 255).astype(np.float32)
     if res_factor > 1:
         X = X.reshape(X.shape[0], 28, 28)[:, ::res_factor, ::res_factor].reshape(X.shape[0], -1)
-    return X,y if return_X_y else mnist
+
+    if transform:
+        enc = ComplementEncoder()
+        X = enc.fit_transform(X, y, recurrent=recurrent)
+        return X, y, enc.module_sizes_
+
+    return X,y
+
+def load_digits_64(transform=False, recurrent=False):
+    X,y = load_digits(return_X_y=True)
+    X /= 16
+
+    if transform:
+        enc = ComplementEncoder()
+        X = enc.fit_transform(X, y, recurrent=recurrent)
+        return X, y, enc.module_sizes_
+
+    return X,y
