@@ -21,7 +21,7 @@ def get_cluster_arrays(X, oneindexed=False, decimals=None, **kwargs):
         clusters[pat.tobytes()].append(idx + oneindexed)
     return list(clusters.values())
 
-def get_cluster_ids(X, decimals=2, **kwargs):
+def get_cluster_ids(X, decimals, **kwargs):
     """Returns an array of cluster IDs, where the index corresponds to sample ID"""
     n_samples, _ = X.shape
     clusters = get_cluster_arrays(X, False, decimals, **kwargs)
