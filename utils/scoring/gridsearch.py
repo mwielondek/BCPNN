@@ -9,7 +9,7 @@ class GridSearch:
 
     decimals_key = '__decimals'
 
-    def fit(self, clf, X, y, params, fit_params={}, verbose=False, scoring_fn=ami, decimals=3):
+    def fit(self, clf, X, y, params, fit_params={}, verbose=False, scoring_fn=ami, decimals=None):
         clf.fit(X, **fit_params)
         if verbose:
             print("Finished fitting")
@@ -24,14 +24,11 @@ class GridSearch:
                     continue
                 setattr(clf, k, v)
             pred = clf.predict(X)
-            if isinstance(decimals, int):
-                calculated_decimals = decimals
-            elif self.decimals_key in param_set.keys():
-                calculated_decimals = param_set[self.decimals_key]
-            else:
-                # set decimals to correlate with clf.tol
-                calculated_decimals = clf.TOL - 1
-            clsid = get_cluster_ids(pred, decimals=calculated_decimals)
+
+            if self.decimals_key in param_set.keys():
+                decimals = param_set[self.decimals_key]
+
+            clsid = get_cluster_ids(pred, decimals=decimals)
             score = scoring_fn(clsid, y)
             res['params'].append(param_set)
             res['score'].append(score)
