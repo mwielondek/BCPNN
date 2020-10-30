@@ -37,8 +37,9 @@ def load_mushrooms():
 
 ## Preprocess fns
 
-from BCPNN.encoder import OneHotEncoder
+from BCPNN.encoder import OneHotEncoder, ComplementEncoder
 from sklearn.preprocessing import KBinsDiscretizer
+from sklearn.base import TransformerMixin, BaseEstimator
 
 def onehot_encode(X, y, handle_unknown='ignore'):
     enc = OneHotEncoder(handle_unknown=handle_unknown)
@@ -48,6 +49,26 @@ def onehot_encode(X, y, handle_unknown='ignore'):
 def discretize_onehot_encode(X, y):
     kbd = KBinsDiscretizer(n_bins=5, encode='ordinal', strategy='uniform')
     return onehot_encode(kbd.fit_transform(X), y)
+
+class UniformScaler(BaseEstimator, TransformerMixin):
+    """Scales all features by the same factor"""
+
+    def __init__(self, factor=None):
+        self.factor = factor
+
+    def fit(self, X, y=None, **fit_params):
+        if self.factor is None:
+            self.factor = 1 / X.max()
+        return self
+
+    def transform(self, X, **transform_params):
+        return X * self.factor
+
+def uniform_scale_complement_encode(X, y):
+    Xt = UniformScaler().fit_transform(X)
+    enc = ComplementEncoder()
+    Xt = enc.fit_transform(Xt, y)
+    return Xt, y, enc.module_sizes_
 
 ## Schema
 def run_default():
@@ -109,7 +130,7 @@ scoring_schema = {
                 'loader': load_zoo,
                 'loader_params': dict(mode='all')
             }],
-            'preprocess': [['scale','complement_encode'], discretize_onehot_encode]
+            'preprocess': [['scale','complement_encode'], discretize_onehot_encode, uniform_scale_complement_encode]
         },
         'binary': {
             'data': [{
