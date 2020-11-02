@@ -4,27 +4,27 @@ def get_unique_patterns(X):
     """Returns distinct pattern count"""
     return np.unique(X, axis=0)
 
-def round_patterns(X, decimals, mode='truncate'):
+def round_patterns(X, decimals=2, mode='truncate'):
     """Truncates (or rounds) patterns to `decimals`"""
     if mode == 'truncate':
         return np.trunc(X*10**decimals)/(10**decimals)
     elif mode == 'round':
         return X.round(decimals=decimals)
 
-def get_cluster_arrays(X, oneindexed=False, decimals=None, **kwargs):
+def get_cluster_arrays(X, oneindexed=False, **kwargs):
     """Returns an array of clusters, where each value corresponds to sample ID"""
     clusters = {}
-    rounded = round_patterns(X, decimals, **kwargs)
+    rounded = round_patterns(X, **kwargs)
     for pat in get_unique_patterns(rounded):
         clusters[pat.tobytes()] = []
     for idx,pat in enumerate(rounded):
         clusters[pat.tobytes()].append(idx + oneindexed)
     return list(clusters.values())
 
-def get_cluster_ids(X, decimals, **kwargs):
+def get_cluster_ids(X, **kwargs):
     """Returns an array of cluster IDs, where the index corresponds to sample ID"""
     n_samples, _ = X.shape
-    clusters = get_cluster_arrays(X, False, decimals, **kwargs)
+    clusters = get_cluster_arrays(X, False, **kwargs)
     arr = np.zeros(n_samples).astype(int)
     for cidx, c in enumerate(clusters):
         for sample in c:
@@ -41,14 +41,19 @@ def collect_cluster_ids(clf, X, gvals, decimals=2, fit_params=None, predict_para
     if not hasattr(clf, 'X_'):
         clf.fit(X, **fit_params)
 
-    if decimals <= 0:
-        # default to a precision of `decimals` less SF than clf.TOL
-        decimals =  int(np.log10(clf.TOL) * -1) + decimals
+    decimals_param = {}
+    if decimals is not None:
+
+        if decimals <= 0:
+            # default to a precision of `decimals` less SF than clf.TOL
+            decimals =  int(np.log10(clf.TOL) * -1) + decimals
+
+        decimals_param = dict(decimals=decimals)
 
     for idx, g in enumerate(gvals):
         clf.g = g
         pred = clf.predict(X, **predict_params)
-        clusters[idx] = get_cluster_ids(pred, decimals=decimals, **kwargs)
+        clusters[idx] = get_cluster_ids(pred, **decimals_param, **kwargs)
 
     return clusters.astype(int)
 

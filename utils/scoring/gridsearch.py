@@ -28,14 +28,17 @@ class GridSearch:
                 setattr(clf, k, v)
             pred = clf.predict(X)
 
+            decimals_param = {}
             if self.decimals_key in param_set.keys():
                 decimals = param_set[self.decimals_key]
+            if decimals is not None:
+                decimals_param = dict(decimals=decimals)
 
             mode_param = {}
             if self.mode_key in param_set.keys():
                 mode_param = dict(mode=param_set[self.mode_key])
 
-            clsid = get_cluster_ids(pred, decimals=decimals, **mode_param)
+            clsid = get_cluster_ids(pred, **decimals_param, **mode_param)
             score = scoring_fn(clsid, y)
             res['params'].append(param_set)
             res['score'].append(score)
