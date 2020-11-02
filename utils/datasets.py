@@ -94,7 +94,7 @@ def load_mushrooms(transform=False, recurrent=False):
 
 def load_digits_784(res_factor=1, transform=False, recurrent=False):
     mnist = pd.read_csv('parent/../datasets/mnist_784.csv')
-    y = mnist['class'].astype(np.int8)
+    y = mnist['class'].astype(np.int8).to_numpy()
     X = mnist.iloc[:,:-1]
     X = (X.values.astype(np.uint8) / 255).astype(np.float32)
     if res_factor > 1:
