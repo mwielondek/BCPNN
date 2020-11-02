@@ -1,12 +1,10 @@
 ## Loader fns
 
-import pandas as pd
-import numpy as np
 from sklearn import datasets
 import warnings
 
 from . import Scorer
-from ..datasets import load_digits_784, load_mushrooms, load_zoo
+from ..datasets import load_mushrooms, load_zoo
 
 ## Preprocess fns
 
