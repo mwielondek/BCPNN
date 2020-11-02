@@ -48,12 +48,13 @@ def run_default():
         run_schema(scoring_schema)
 
 
-def run_schema(schema, clfidx=None):
+def run_schema(schema, scorer=None, clfidx=None):
 
     def pprint(msg):
         print("****** {:^103} ******".format(str(msg)))
 
-    sc = Scorer(clfidx)
+    if scorer is None:
+        scorer = Scorer(clfidx)
 
     data = schema['data']
     for dtype,dtype_val in data.items():
@@ -68,11 +69,11 @@ def run_schema(schema, clfidx=None):
                 if callable(preprocess):
                     pprint("Preprocess fn: {}".format(preprocess.__name__))
                     Xt, y, modsz = preprocess(X, y)
-                    scores = sc.score_all(Xt, y, method='cv', fit_params=dict(pmBCPNN__module_sizes=modsz))
+                    scores = scorer.score_all(Xt, y, method='cv', fit_params=dict(pmBCPNN__module_sizes=modsz))
                 else:
                     pprint("Pipeline preprocess: {}".format(preprocess))
-                    scores = sc.score_all(X, y, pipeline__preprocess=preprocess)
-                sc.pretty_print(scores)
+                    scores = scorer.score_all(X, y, pipeline__preprocess=preprocess)
+                scorer.pretty_print(scores)
                 print()
             print()
 
