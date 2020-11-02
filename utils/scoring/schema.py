@@ -101,7 +101,7 @@ scoring_schema = {
                 'loader': load_zoo,
                 'loader_params': dict(mode='all')
             }],
-            'preprocess': [['scale','complement_encode'], discretize_onehot_encode, uniform_scale_complement_encode]
+            'preprocess': [discretize_onehot_encode, uniform_scale_complement_encode]
         },
         'binary': {
             'data': [{

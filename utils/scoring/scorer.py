@@ -1,6 +1,6 @@
 from sklearn.naive_bayes import MultinomialNB, BernoulliNB, GaussianNB
 from sklearn.model_selection import StratifiedKFold, cross_val_score
-from sklearn.preprocessing import KBinsDiscretizer as KBD, MinMaxScaler
+from sklearn.preprocessing import KBinsDiscretizer as KBD
 
 from BCPNN.feedforward_modular import mBCPNN
 from BCPNN.feedforward import BCPNN
@@ -111,9 +111,6 @@ class Scorer:
 
     def create_pipeline(self, clf, preprocess=(), pipeline_params={}):
         estimators = []
-        if 'scale' in preprocess:
-            estimators.append(('scaler', MinMaxScaler()))
-
         if 'discretize' in preprocess:
             estimators.append(('discretizer', KBD(n_bins=5, encode='ordinal', strategy='uniform')))
 
