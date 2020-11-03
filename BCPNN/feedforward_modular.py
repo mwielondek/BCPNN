@@ -64,12 +64,16 @@ class mBCPNN:
         # Prepare weight modules to be multiplied with X modules during predict steps
         self.weight_modules = self._get_weight_modules()
 
-    def predict_log_proba(self, X, assert_off=False):
+    def predict_log_proba(self, X, assert_off=False, clamped=False, origX=None):
         """Classify and return the log probabilities of each sample
         belonging to respective class."""
         if not assert_off:
             self._assert_module_normalization(X)
-        beta = self.beta # of shape n_classes_
+        if clamped:
+            beta_zero = self.n_training_samples ** -self.n_features_
+            beta = np.log(np.where(origX == 0, beta_zero, origX))
+        else:
+            beta = self.beta # of shape n_classes_
         # split weights and input into modules
         x_modules = np.split(X, self.x_module_sections, axis=1)
         x_modules = self._zero_padded(x_modules, X.shape[0], self.max_module_size)
