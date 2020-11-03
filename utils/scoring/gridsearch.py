@@ -12,16 +12,24 @@ class GridSearch:
 
     def fit(self, clf, X, y, params, fit_params={}, verbose=0, scoring_fn=ami, decimals=None):
         if verbose > 0:
-            print("Fitting...")
+            print("Fitting...", end='')
         clf.fit(X, **fit_params)
+        if verbose > 0:
+            print(" ✔︎")
 
         if verbose > 0:
-            print("Predicting...")
+            nl = '\n'
+            if verbose == 1:
+                nl = ''
+            print("Predicting...", end=nl)
         res = dict(params=[], score=[])
         params = ParameterGrid(params)
         for i, param_set in enumerate(params):
-            if verbose > 1:
-                print("[{}/{}] Predicting with params {}".format(i+1, len(params), param_set))
+            if verbose > 0:
+                if verbose > 1:
+                    print("[{}/{}] Predicting with params {}".format(i+1, len(params), param_set))
+                else:
+                    print('.' * max(1, 100 // len(params)), end='')
             for k,v in param_set.items():
                 if k in [self.decimals_key, self.mode_key]:
                     continue
@@ -42,6 +50,9 @@ class GridSearch:
             score = scoring_fn(clsid, y)
             res['params'].append(param_set)
             res['score'].append(score)
+
+        if verbose > 0:
+            print(" ✔︎")
 
         self.res_ = res
 
