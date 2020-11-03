@@ -47,7 +47,7 @@ class GridSearch:
                 mode_param = dict(mode=param_set[self.mode_key])
 
             clsid = get_cluster_ids(pred, **decimals_param, **mode_param)
-            score = scoring_fn(clsid, y)
+            score = scoring_fn(y, clsid)
             res['params'].append(param_set)
             res['score'].append(score)
 
