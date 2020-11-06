@@ -50,12 +50,17 @@ def collect_cluster_ids(clf, X, gvals, decimals=2, fit_params={}, predict_params
 
         decimals_param = dict(decimals=decimals)
 
+    print_progress(0, gvals.size)
     for idx, g in enumerate(gvals):
         clf.g = g
         pred = clf.predict(X, **predict_params)
         clusters[idx] = get_cluster_ids(pred, **decimals_param, **kwargs)
+        print_progress(idx + 1, gvals.size)
 
     return clusters.astype(int)
+
+def print_progress(i, n):
+    print("Progress: "+"#"*i + "-"*(n-i), end='\r')
 
 def get_distance(X):
     """Calculate hamming distance between patterns"""
