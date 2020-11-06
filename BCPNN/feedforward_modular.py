@@ -180,7 +180,7 @@ class mBCPNN:
         prob_classes = self.prob[self.y_pad:]
 
         # we deal with log(0) case, as per Holst 1997 (eq. 2.37)
-        beta_zero = np.log(1 / (self.n_training_samples ** 2))
+        beta_zero = np.log(self.n_training_samples) * -2
 
         # we expect probabilities for some classes can be zero
         with np.errstate(divide='ignore'):
