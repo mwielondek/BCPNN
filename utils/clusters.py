@@ -31,7 +31,7 @@ def get_cluster_ids(X, **kwargs):
             arr[sample] = cidx
     return arr
 
-def collect_cluster_ids(clf, X, gvals, decimals=2, fit_params=None, predict_params=None, **kwargs):
+def collect_cluster_ids(clf, X, gvals, decimals=2, fit_params={}, predict_params={}, **kwargs):
     """Get cluster IDs as a function of g values"""
     n_samples, _ = X.shape
     n_gvals = len(gvals)
