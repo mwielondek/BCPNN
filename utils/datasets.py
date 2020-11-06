@@ -42,16 +42,17 @@ def generate_synthetic_dataset(levels=3):
             s += 3 ** i * d
         return s
 
-    ones = np.ones(levels, dtype=int)
     rows = 3**levels
     base3nums = [to_base3(x) for x in range(rows)]
-    base3idx = np.array(list( map(list, base3nums) )).astype(int) + ones
+    base3idx = np.array(list( map(list, base3nums) )).astype(int) + 1
     out = np.zeros((rows, levels))
     for i, idx in enumerate(base3idx):
         idxstr = ''.join(idx.astype(str))
         prefixes = [idxstr[:a] for a in range(1,len(idxstr)+1)]
         out[i] = list(map(from_base3, prefixes))
-    return out.astype(int) - ones
+    out = out.astype(int) - 1
+    y = out[:, levels-2] - int((3**(levels-1) - 3)/2)
+    return out, y
 
 def load_zoo(mode='all', transform=False, recurrent=False):
     path = '../../datasets/zoo-animal-classification/'
