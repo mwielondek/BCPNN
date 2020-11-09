@@ -11,7 +11,7 @@ class rmBCPNN(mBCPNN):
     def __repr__(self):
         return "rmBCPNN()"
 
-    def __init__(self, max_iter=1e3, tol=1e-5, prob_threshold=0.5, verbose=False, damping=False, clamping=False, **kwargs):
+    def __init__(self, max_iter=1e3, tol=1e-5, prob_threshold=0.5, verbose=1, damping=False, clamping=False, **kwargs):
         super().__init__(**kwargs)
         self.MAX_ITER = max_iter
         self.TOL = tol
@@ -56,7 +56,7 @@ class rmBCPNN(mBCPNN):
         if self.VERBOSE:
             if iter >= self.MAX_ITER:
                 print("BCPNN: reached max iteration limit of ", self.MAX_ITER)
-            else:
+            if self.VERBOSE > 1:
                 print("BCPNN: iters", iter)
 
         return input
