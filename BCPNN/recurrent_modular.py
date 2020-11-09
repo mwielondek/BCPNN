@@ -11,12 +11,14 @@ class rmBCPNN(mBCPNN):
     def __repr__(self):
         return "rmBCPNN()"
 
-    def __init__(self, max_iter=1e3, tol=1e-5, prob_threshold=0.5, verbose=False, **kwargs):
+    def __init__(self, max_iter=1e3, tol=1e-5, prob_threshold=0.5, verbose=False, damping=False, clamping=False, **kwargs):
         super().__init__(**kwargs)
         self.MAX_ITER = max_iter
         self.TOL = tol
         self.PROB_THRESHOLD = prob_threshold
         self.VERBOSE = verbose
+        self.damping = damping
+        self.clamping = clamping
 
     def fit(self, X, module_sizes=None):
         n_samples, n_features = X.shape
@@ -31,15 +33,32 @@ class rmBCPNN(mBCPNN):
         input = X
         prev = np.zeros_like(X)
         iter = 0
-        while  (iter < self.MAX_ITER and \
-                not np.allclose(input, prev, atol=self.TOL, rtol=0)):
-            prev = input
-            input = self.predict_proba(prev, assert_off=True)
-            iter += 1
+
+        # Clamped / free mode as per Levin 1995, Ch. 2.3
+        for clamped in [True, False] if self.clamping else [False]:
+            while  (iter < self.MAX_ITER and \
+                    not np.allclose(input, prev, atol=self.TOL, rtol=0)):
+                iter += 1
+                prev = input
+                input = self.predict_proba(prev, assert_off=True, clamped=clamped, origX=X)
+
+                # As per Levin 1995, Ch. 2.3
+                if self.damping:
+                    delta = 0.1
+                    diff = input - prev
+                    factor = delta / abs(np.where(diff == 0, delta, diff))
+                    factor = np.where(factor < 0.5, factor, 0.5)
+                    input = prev + factor * (diff)
+
         if return_binary:
             input = self._binarize(input, self.PROB_THRESHOLD)
-        if self.VERBOSE and iter >= self.MAX_ITER:
-            print("BCPNN: reached max iteration limit of ", self.MAX_ITER)
+
+        if self.VERBOSE:
+            if iter >= self.MAX_ITER:
+                print("BCPNN: reached max iteration limit of ", self.MAX_ITER)
+            else:
+                print("BCPNN: iters", iter)
+
         return input
 
     def score(self, X, y, tol=0.5):
