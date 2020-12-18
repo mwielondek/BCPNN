@@ -138,7 +138,7 @@ class mBCPNN:
         iprim = flat_idx - module_cumsum[i]
         return (i, iprim)
 
-    def _transfer_fn(self, support):
+    def _transfer_fn(self, support, rescale=True):
         # Since the independence assumption often is only approximately
         # fulfilled, these equations give only an approximation of the
         # probability. Therefore the formulas will eventually produce
@@ -147,6 +147,11 @@ class mBCPNN:
         # (Holst 1997, eq. 2.14)
         if not self.normalize:
             return np.exp(np.where(support > 0, 0, support))
+
+        # Ensure that the bifurcations occur for roughly the same values
+        # of G irrespective of net- work size (Johansson 2006)
+        if rescale:
+            support /= self.n_features_
 
         expsup = np.exp(support * self.g)
         # split returns views into existing array so we can work directly with expsup
