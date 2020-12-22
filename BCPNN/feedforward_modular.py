@@ -67,6 +67,7 @@ class mBCPNN:
     def predict_log_proba(self, X, assert_off=False, clamped=False, origX=None):
         """Classify and return the log probabilities of each sample
         belonging to respective class."""
+        assert hasattr(self, 'X_'), "clf hasn't been fit"
         if not assert_off:
             self._assert_module_normalization(X)
         if clamped:
